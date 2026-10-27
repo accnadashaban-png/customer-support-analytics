@@ -1,0 +1,4 @@
+member_id,tier,status,started_at
+m1,Basic,active,2026-09-01T00:00:00Z
+m2,Basic,active,2026-09-15T00:00:00Z
+m2,Pro,trial,2026-10-06T00:00:00Z

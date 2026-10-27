@@ -1,0 +1,5 @@
+id,conversation_id,member_id,sender,agent_name,body,sent_at
+1,t1,m1,member,,I can't log in,2026-10-04T10:00:00+03:00
+2,t1,m1,agent,Sara,Your verification code is 482913,2026-10-04T10:00:30+03:00
+3,t1,m1,agent,Omar,Fixed - please try again,2026-10-04T10:25:00+03:00
+4,t2,m2,member,,عايز أرقي اشتراكي,2026-10-04T11:00:00+03:00
