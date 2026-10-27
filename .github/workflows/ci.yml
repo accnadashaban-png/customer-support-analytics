@@ -21,6 +21,8 @@ jobs:
       - run: ruff check .
       - run: mypy support_analytics
       - run: pytest --cov=support_analytics --cov-report=term-missing
+      - name: Metric evaluation (scenarios + invariants)
+        run: python -m support_analytics eval
 
   docker:
     runs-on: ubuntu-latest
@@ -32,4 +34,4 @@ jobs:
         run: |
           docker run -d -p 8000:8000 customer-support-analytics
           for i in $(seq 1 20); do curl -fs http://127.0.0.1:8000/health && break; sleep 1; done
-          curl -fs "http://127.0.0.1:8000/api/summary?days=30" | grep -q '"reply_rate"'
+          curl -fs "http://127.0.0.1:8000/api/kpis?days=30" | grep -q '"reply_rate"'
