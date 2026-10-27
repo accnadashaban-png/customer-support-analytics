@@ -1,0 +1,170 @@
+[
+  {
+    "id": "bot-is-not-a-reply",
+    "rule": "An automated verification code 30 seconds after the member writes is not the first response.",
+    "messages": [
+      ["c1", "m1", "member", null, "I can't log in", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Sara", "Your verification code is 482913", "2026-10-04T10:00:30Z"],
+      ["c1", "m1", "agent", "Omar", "Fixed, please try again", "2026-10-04T10:30:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"replied": true, "first_response_min": 30.0, "first_response_business_min": 30.0, "agent": "Omar",
+                        "sla_met": true, "sla_breached": false, "waiting": false, "topic": "access"}}
+  },
+  {
+    "id": "after-hours-counts-business-time",
+    "rule": "Thursday 17:50 to Sunday 09:10 is 63h20m on the calendar but 20 business minutes (Sun-Thu 09:00-18:00).",
+    "messages": [
+      ["c1", "m1", "member", null, "How do I join the live session?", "2026-10-01T17:50:00Z"],
+      ["c1", "m1", "agent", "Mona", "Here is the link", "2026-10-04T09:10:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"first_response_min": 3800.0, "first_response_business_min": 20.0, "sla_met": true,
+                        "topic": "events"}}
+  },
+  {
+    "id": "unanswered-breaches-sla-and-alerts",
+    "rule": "An unanswered contact breaches the SLA once its business age passes the target, and is in the alert queue.",
+    "config": {"sla_first_response_minutes": 60, "alert_after_minutes": 90},
+    "messages": [["c1", "m1", "member", null, "Is there a student discount?", "2026-10-04T10:00:00Z"]],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"replied": false, "sla_met": null, "sla_breached": true, "waiting": true,
+                        "waiting_since": "2026-10-04T10:00:00Z", "waiting_business_min": 120.0, "topic": "plans"}},
+    "expect_queue": [{"contact_id": "c1#1", "alert": true}]
+  },
+  {
+    "id": "unanswered-inside-sla-is-not-yet-a-breach",
+    "rule": "Unanswered for 30 business minutes with a 60-minute target: waiting, not breached, no alert.",
+    "messages": [["c1", "m1", "member", null, "Hello?", "2026-10-04T10:00:00Z"]],
+    "now": "2026-10-04T10:30:00Z",
+    "expect": {"c1#1": {"sla_met": null, "sla_breached": false, "waiting": true, "waiting_business_min": 30.0}},
+    "expect_queue": [{"contact_id": "c1#1", "alert": false}]
+  },
+  {
+    "id": "returning-member-is-a-new-contact",
+    "rule": "The member comes back two days after a reply: a second contact with its own response time.",
+    "messages": [
+      ["c1", "m1", "member", null, "Login problem", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Omar", "Done", "2026-10-04T10:20:00Z"],
+      ["c1", "m1", "member", null, "I need an invoice for my payment", "2026-10-06T11:00:00Z"],
+      ["c1", "m1", "agent", "Sara", "Sent", "2026-10-06T13:00:00Z"]
+    ],
+    "now": "2026-10-07T10:00:00Z",
+    "expect": {"c1#1": {"first_response_min": 20.0, "topic": "access", "sla_met": true},
+               "c1#2": {"first_response_min": 120.0, "first_response_business_min": 120.0, "agent": "Sara",
+                        "sla_met": false, "sla_breached": true, "topic": "billing"}},
+    "expect_kpis": {"contacts": 2, "replied": 2, "sla_breaches": 1, "sla_met_rate": 0.5}
+  },
+  {
+    "id": "follow-up-inside-the-gap-stays-one-contact",
+    "rule": "A new question 20 minutes after a reply is the same contact, and it is waiting again.",
+    "messages": [
+      ["c1", "m1", "member", null, "Where is the recording?", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Mona", "In the library", "2026-10-04T10:10:00Z"],
+      ["c1", "m1", "member", null, "And the slides?", "2026-10-04T10:30:00Z"]
+    ],
+    "now": "2026-10-04T11:00:00Z",
+    "expect": {"c1#1": {"first_response_min": 10.0, "waiting": true, "waiting_since": "2026-10-04T10:30:00Z",
+                        "waiting_business_min": 30.0}},
+    "expect_kpis": {"contacts": 1, "waiting_on_reply": 1}
+  },
+  {
+    "id": "closing-thanks-needs-no-reply",
+    "rule": "A lone thank-you after the answer does not put the contact back in the queue (English and Arabic).",
+    "messages": [
+      ["c1", "m1", "member", null, "How do I cancel?", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Omar", "Here's how", "2026-10-04T10:05:00Z"],
+      ["c1", "m1", "member", null, "Thanks!", "2026-10-04T10:06:00Z"],
+      ["c2", "m2", "member", null, "عايز ألغي الاشتراك", "2026-10-04T10:00:00Z"],
+      ["c2", "m2", "agent", "Sara", "تم", "2026-10-04T10:05:00Z"],
+      ["c2", "m2", "member", null, "شكرًا 🙏", "2026-10-04T10:06:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"waiting": false, "topic": "cancellation"}, "c2#1": {"waiting": false, "topic": "cancellation"}},
+    "expect_queue": []
+  },
+  {
+    "id": "broadcast-only-threads-are-excluded",
+    "rule": "A renewal reminder nobody answered is not a support contact.",
+    "messages": [["c1", "m1", "agent", "Sara", "Your membership renews on 2026-11-01.", "2026-10-04T10:00:00Z"]],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {},
+    "expect_kpis": {"contacts": 0},
+    "expect_broadcasts": 1
+  },
+  {
+    "id": "upgrade-to-trial-counts-with-revenue",
+    "rule": "Basic to Pro trial five days after the contact is an upgrade worth 29 - 9 = 20 per month.",
+    "messages": [
+      ["c1", "m1", "member", null, "What's the difference between Pro and Elite?", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Omar", "Pro adds...", "2026-10-04T10:15:00Z"]
+    ],
+    "subscriptions": [["m1", "Basic", "active", "2026-09-01T00:00:00Z"], ["m1", "Pro", "trial", "2026-10-09T10:00:00Z"]],
+    "now": "2026-10-20T12:00:00Z",
+    "expect": {"c1#1": {"tier_at_contact": "Basic", "upgraded_to": "Pro", "days_to_upgrade": 5.0, "mrr_gain": 20.0,
+                        "current_tier": "Pro", "topic": "plans"}},
+    "expect_kpis": {"upgrades": 1, "mrr_from_upgrades": 20.0}
+  },
+  {
+    "id": "downgrade-cancel-and-late-upgrade-are-not-upgrades",
+    "rule": "A downgrade, a cancellation, and an upgrade after the 14-day window never count.",
+    "messages": [
+      ["c1", "m1", "member", null, "question", "2026-10-04T10:00:00Z"], ["c1", "m1", "agent", "Omar", "answer", "2026-10-04T10:05:00Z"],
+      ["c2", "m2", "member", null, "question", "2026-10-04T10:00:00Z"], ["c2", "m2", "agent", "Omar", "answer", "2026-10-04T10:05:00Z"],
+      ["c3", "m3", "member", null, "question", "2026-10-04T10:00:00Z"], ["c3", "m3", "agent", "Omar", "answer", "2026-10-04T10:05:00Z"]
+    ],
+    "subscriptions": [
+      ["m1", "Pro", "active", "2026-09-01T00:00:00Z"], ["m1", "Basic", "active", "2026-10-07T00:00:00Z"],
+      ["m2", "Pro", "active", "2026-09-01T00:00:00Z"], ["m2", "Pro", "canceled", "2026-10-06T00:00:00Z"],
+      ["m3", "Basic", "active", "2026-09-01T00:00:00Z"], ["m3", "Elite", "active", "2026-10-24T10:00:00Z"]
+    ],
+    "now": "2026-10-30T12:00:00Z",
+    "expect": {"c1#1": {"upgraded_to": null, "current_tier": "Basic"},
+               "c2#1": {"upgraded_to": null, "current_tier": "Free"},
+               "c3#1": {"upgraded_to": null, "current_tier": "Elite"}},
+    "expect_kpis": {"upgrades": 0, "mrr_from_upgrades": 0.0}
+  },
+  {
+    "id": "team-time-zone-is-respected",
+    "rule": "Dubai team (UTC+4): a message at 08:30 local answered at 09:30 local is 60 calendar but 30 business minutes.",
+    "config": {"business_hours": {"timezone": "Asia/Dubai"}},
+    "messages": [
+      ["c1", "m1", "member", null, "Hi, the video is not working", "2026-10-04T04:30:00Z"],
+      ["c1", "m1", "agent", "Mona", "Try now", "2026-10-04T05:30:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"first_response_min": 60.0, "first_response_business_min": 30.0, "topic": "technical"}}
+  },
+  {
+    "id": "holidays-are-not-business-time",
+    "rule": "Sunday is a holiday: a Sunday 10:00 message answered Monday 10:00 took 60 business minutes.",
+    "config": {"business_hours": {"timezone": "UTC", "holidays": ["2026-10-04"]}},
+    "messages": [
+      ["c1", "m1", "member", null, "Hello", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Omar", "Hi!", "2026-10-05T10:00:00Z"]
+    ],
+    "now": "2026-10-05T12:00:00Z",
+    "expect": {"c1#1": {"first_response_min": 1440.0, "first_response_business_min": 60.0, "sla_met": true}}
+  },
+  {
+    "id": "first-human-agent-gets-the-credit",
+    "rule": "The first human reply is credited, not later ones.",
+    "messages": [
+      ["c1", "m1", "member", null, "الفيديو مش بيشتغل عندي", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "agent", "Mona", "جاري المراجعة", "2026-10-04T10:12:00Z"],
+      ["c1", "m1", "agent", "Omar", "اتحلت", "2026-10-04T11:00:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"agent": "Mona", "first_response_min": 12.0, "topic": "technical"}}
+  },
+  {
+    "id": "local-time-input-is-normalized",
+    "rule": "Timestamps sent with a +03:00 offset are stored and measured in UTC.",
+    "messages": [
+      ["c1", "m1", "member", null, "Can I get an invoice?", "2026-10-04T13:00:00+03:00"],
+      ["c1", "m1", "agent", "Sara", "Sure", "2026-10-04T10:45:00Z"]
+    ],
+    "now": "2026-10-04T12:00:00Z",
+    "expect": {"c1#1": {"first_message_at": "2026-10-04T10:00:00Z", "first_response_min": 45.0, "topic": "billing"}}
+  }
+]
