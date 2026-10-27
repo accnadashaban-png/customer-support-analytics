@@ -1,4 +1,4 @@
-.PHONY: setup sync test lint run report
+.PHONY: setup sync test lint run report eval
 
 setup:   ## install with dev tools
 	pip install -e ".[dev]"
@@ -17,4 +17,7 @@ report: sync  ## last-30-day summary in the terminal
 	python -m support_analytics report --days 30
 
 run: sync    ## dashboard on http://127.0.0.1:8000
-	uvicorn support_analytics.api:app --reload
+	uvicorn support_analytics.api.app:app --reload
+
+eval:    ## metric accuracy: exact scenarios + invariants on 25 random datasets
+	python -m support_analytics eval

@@ -1,81 +1,91 @@
 # Customer Support Analytics
 
 [![CI](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![Metric eval](https://img.shields.io/badge/metric%20eval-14%20scenarios%20%C2%B7%2025%20datasets-success) ![License](https://img.shields.io/badge/license-MIT-green)
 
-Turns a support inbox into numbers a team can act on: **how fast humans reply, how many members are still waiting, and who upgraded after talking to support.** It filters out bots and broadcasts, normalizes every timestamp to UTC, syncs idempotently, and serves a filterable dashboard.
+Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Bring your own data as CSV or JSON, or push it through an API.
 
-![Dashboard: KPIs, weekly trend, agents, and a conversation with an automated message marked as not counted](docs/dashboard.jpg)
+![Dashboard: KPIs, the open queue sorted by business-time waiting, and the support funnel](docs/dashboard.jpg)
 
-> A public, from-scratch rebuild of an internal tool I built end to end at work, running on **synthetic data** (fictional members, messages and subscriptions) so the code can be shared. No company data, names or integrations.
+> A public, from-scratch rebuild of an internal tool I built end to end at work, running here on **synthetic data**. No company data, names or integrations.
 
-## Why accuracy needs rules
+## What it answers
 
-Raw inbox exports make support look better or worse than it is. The metrics here follow explicit rules, each covered by a test with a hand-computed answer:
-
-| Rule | Why |
+| Question | How |
 |---|---|
-| **Bots never count as a reply.** Verification codes, welcome messages and renewal reminders sent from the support account are detected (`bot_patterns.txt`, case- and whitespace-insensitive, English and Arabic) and excluded. | Otherwise an auto-message 20 seconds after the member writes looks like a 20-second response. |
-| **First response = member's first message → first *human* reply after it.** | Measures what the member actually experienced. |
-| **Broadcast-only threads are excluded.** A thread where the member never wrote isn't a support conversation. | Mass reminders would inflate the volume and deflate the reply rate. |
-| **Waiting on reply** = the latest message from a person is the member's, with no human reply after it. A lone "thanks" / "شكرًا" / "تمام" doesn't need an answer. | Gives the team a real to-do list, without false alarms. |
-| **Upgrade after support** = moved to a higher paid tier within 14 days of the first message. A `trial` counts as paid access; cancellations and downgrades don't count. | Connects support work to revenue without counting churn as success. |
-| **Everything is stored in UTC** and shown in the viewer's local time. Naive timestamps are rejected. | Date filters and durations are exact across timezones. |
-| **Sync is an upsert and never deletes.** Re-running it changes nothing; an empty or failed pull leaves the data intact; every run is logged in `sync_runs`. | Safe to schedule; history only grows. |
+| Who is waiting for us right now? | An **open queue**, oldest first, with waiting time in business hours and alerts past a threshold. |
+| How fast do we reply, honestly? | First response to each **contact**, in calendar and **business** minutes (team time zone, working days, holidays). Bots never count as a reply. |
+| Do we meet our SLA? | Share of contacts answered within the target, and every breach, including unanswered ones. |
+| What do people ask about? | Arabic + English **topic** classification with per-topic reply rate, speed and SLA. |
+| Does support drive revenue? | Upgrades within 14 days of a contact, the **monthly revenue** they added, and a contacted → replied → within SLA → upgraded **funnel**. |
+| Who on the team carries the load? | Per-agent first replies, speed and SLA. |
 
-## Metrics
+## Why the numbers can be trusted
 
-- Median and p90 first response time (nearest-rank percentiles), plus mean
-- Reply rate, conversations waiting on a reply
-- Upgrades after support and upgrade rate
-- Weekly trend and per-agent breakdown
+Raw exports make support look better or worse than it is. The rules are explicit ([METRICS.md](docs/METRICS.md)) and **evaluated**:
+
+- **14 exact scenarios** (79 checks), one rule each, computed by hand: a bot code 30 seconds after the member writes,
+  Thursday-evening-to-Sunday replies (63 h on the clock, 20 business minutes), holidays, a team in another time zone,
+  a returning member starting a second contact, a lone "thanks", trials, downgrades, cancellations, late upgrades, offsets in input timestamps.
+- **Invariants on 25 random datasets**: business time never exceeds calendar time, a met SLA is within target,
+  upgrades are inside the window and go up a plan, re-importing the same data changes nothing.
+- The evaluator is tested too: a deliberately wrong expectation must fail.
+
+```bash
+python -m support_analytics eval     # scenarios 14/14 (79 checks), invariants 25/25
+```
 
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
-python -m support_analytics sync            # load demo data (run it twice: nothing changes)
-python -m support_analytics report --days 30
-uvicorn support_analytics.api:app           # dashboard on http://127.0.0.1:8000
-pytest                                       # 19 tests, 91% coverage
+python -m support_analytics sync                    # demo data (run it twice: nothing changes)
+uvicorn support_analytics.api.app:app               # dashboard on http://127.0.0.1:8000
+pytest                                              # 38 tests
 ```
 
-Or with Docker: `docker build -t customer-support-analytics . && docker run -p 8000:8000 customer-support-analytics`
+**Your own data:** `python -m support_analytics sync --csv ./my-export` with the three CSVs described in [DATA.md](docs/DATA.md)
+([sample](examples/csv)). Adjust business hours, holidays, SLA, topics and plan prices with
+[`workspace.example.json`](workspace.example.json) and `SA_CONFIG_PATH`.
 
-## Plugging in a real source
+**Live data:** push batches to `POST /api/ingest` with an API key, or let the API re-import a folder on a schedule.
 
-A source returns three validated lists (`Member`, `Message`, `Subscription`; see `models.py`). `JsonSource` reads an export file:
-
-```bash
-python -m support_analytics sync --json export.json
-```
-
-For a live helpdesk or community platform, write a small adapter with a `fetch()` method that returns the same `Batch`; validation, bot filtering, UTC normalization and idempotent storage are handled for you.
+**Docker:** `docker build -t customer-support-analytics . && docker run -p 8000:8000 customer-support-analytics`
 
 ## API
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/summary?days=30` | KPIs for a period (or `start` / `end`) |
-| GET | `/api/conversations?view=last30\|waiting\|upgraded\|all&tier=&q=` | Filterable, searchable list |
-| GET | `/api/conversations/{id}` | Transcript with automated messages flagged |
-| GET | `/api/trend`, `/api/agents` | Weekly trend, per-agent stats |
-| POST | `/api/sync` | Run a sync |
-| GET | `/health` | Liveness |
+| GET | `/api/kpis?days=30` | Contacts, reply rate, median/p90 response (calendar and business), SLA, waiting, upgrades, MRR |
+| GET | `/api/queue` | Open contacts, oldest first, with alert flags |
+| GET | `/api/contacts?view=last30\|waiting\|breached\|upgraded\|all&topic=&tier=&q=` | Filterable list |
+| GET | `/api/contacts.csv` | Same filters as CSV (spreadsheet-safe) |
+| GET | `/api/contacts/{id}` | Transcript with automated messages flagged |
+| GET | `/api/trend` · `/api/funnel` · `/api/breakdown/{topics\|agents\|tiers}` | Charts and breakdowns |
+| POST | `/api/ingest` · `/api/sync` | Push data · run the configured source (API key required) |
+| GET | `/api/sync/status` · `/api/config` · `/health` | Last runs and watermark · active configuration · liveness |
+
+## Security
+
+- The ingest and sync endpoints are **off unless API keys are configured**; keys are compared in constant time.
+- Payload size limits and full validation; messages must refer to known members.
+- **CSV export is protected against formula injection** (cells starting with `=`, `+`, `-`, `@` are escaped).
+- Sync is an upsert that **never deletes**; failed runs roll back and are recorded.
+- Security headers on every response; CORS is closed unless origins are configured.
 
 ## Project layout
 
 ```
 support_analytics/
-  models.py         validated records (Pydantic), tier order, access rules
-  classify.py       automated-message detection
-  bot_patterns.txt  editable patterns (English + Arabic)
-  db.py             schema, UTC normalization, idempotent upsert, sync log
-  metrics.py        per-conversation stats, summary, trend, agents
-  sources.py        Source protocol, JSON export source, synthetic generator
-  api.py            FastAPI service
-web/index.html      dashboard (KPIs, trend chart, agents, filters, transcript drawer)
-tests/              exact-answer metric tests + API tests
+  core/        settings (env), workspace config (business hours, SLA, topics, prices)
+  ingest/      models, CSV/JSON/synthetic sources, bot detection, idempotent store, sync + scheduler
+  analytics/   contacts, business hours, reports (KPIs, queue, trend, breakdowns, funnel)
+  api/         FastAPI app
+  eval/        exact scenarios + invariants runner
+web/           dashboard
+tests/         mirrors the package: analytics/ ingest/ api/ eval/
+docs/          metric definitions, data formats
+examples/csv/  a working sample export
 ```
 
 ## Related
