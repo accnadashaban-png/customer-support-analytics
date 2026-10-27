@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: mypy support_analytics
+      - run: pytest --cov=support_analytics --cov-report=term-missing
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t customer-support-analytics .
+      - name: Smoke test
+        run: |
+          docker run -d -p 8000:8000 customer-support-analytics
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:8000/health && break; sleep 1; done
+          curl -fs "http://127.0.0.1:8000/api/summary?days=30" | grep -q '"reply_rate"'
