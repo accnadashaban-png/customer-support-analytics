@@ -67,6 +67,9 @@ def trend(contacts: list[Contact]) -> list[dict[str, Any]]:
     return [{"week": w, **{k: v for k, v in kpis(items).items() if k in keep}} for w, items in sorted(weeks.items())]
 
 
+MIN_FAIR_SAMPLE = 10  # below this, a person's or topic's numbers are mostly chance; show them, but don't rank on them
+
+
 def _grouped(contacts: list[Contact], key: str) -> list[dict[str, Any]]:
     groups: dict[str, list[Contact]] = defaultdict(list)
     for c in contacts:
@@ -74,7 +77,8 @@ def _grouped(contacts: list[Contact], key: str) -> list[dict[str, Any]]:
         if value:
             groups[value].append(c)
     rows = [{key: k, **{m: v for m, v in kpis(items).items() if m in (
-        "contacts", "replied", "reply_rate", "median_first_response_business_min", "sla_met_rate", "upgrades")}}
+        "contacts", "replied", "reply_rate", "median_first_response_business_min", "sla_met_rate", "upgrades")},
+        "low_sample": len(items) < MIN_FAIR_SAMPLE}
         for k, items in groups.items()]
     return sorted(rows, key=lambda r: (-r["contacts"], r[key]))
 
