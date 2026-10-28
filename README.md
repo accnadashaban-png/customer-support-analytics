@@ -3,7 +3,7 @@
 [![CI](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![Metric eval](https://img.shields.io/badge/metric%20eval-14%20scenarios%20%C2%B7%2025%20datasets-success) ![License](https://img.shields.io/badge/license-MIT-green)
 
-Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Bring your own data as CSV or JSON, or push it through an API.
+Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Bring your own data as CSV or JSON, or connect a website chat or DMs live through a webhook.
 
 ![Dashboard: KPIs, the open queue sorted by business-time waiting, and the support funnel](docs/dashboard.jpg)
 
@@ -20,7 +20,7 @@ Support analytics for any community, helpdesk or chat team: **who is still waiti
 | Does support drive revenue? | Upgrades within 14 days of a contact, the **monthly revenue** they added, and a contacted → replied → within SLA → upgraded **funnel**. |
 | Who on the team carries the load? | Per-agent first replies, speed and SLA. |
 
-## Why the numbers can be trusted
+## Why the numbers can be trusted, and are fair
 
 Raw exports make support look better or worse than it is. The rules are explicit ([METRICS.md](docs/METRICS.md)) and **evaluated**:
 
@@ -30,6 +30,7 @@ Raw exports make support look better or worse than it is. The rules are explicit
 - **Invariants on 25 random datasets**: business time never exceeds calendar time, a met SLA is within target,
   upgrades are inside the window and go up a plan, re-importing the same data changes nothing.
 - The evaluator is tested too: a deliberately wrong expectation must fail.
+- **Fair to people:** off-hours time is never counted against the team, bots never count as replies, and agents or topics with fewer than 10 contacts are marked as too few to compare. See [Fairness](docs/METRICS.md#fairness).
 
 ```bash
 python -m support_analytics eval     # scenarios 14/14 (79 checks), invariants 25/25
@@ -41,14 +42,14 @@ python -m support_analytics eval     # scenarios 14/14 (79 checks), invariants 2
 pip install -e ".[dev]"
 python -m support_analytics sync                    # demo data (run it twice: nothing changes)
 uvicorn support_analytics.api.app:app               # dashboard on http://127.0.0.1:8000
-pytest                                              # 38 tests
+pytest                                              # 44 tests
 ```
 
 **Your own data:** `python -m support_analytics sync --csv ./my-export` with the three CSVs described in [DATA.md](docs/DATA.md)
 ([sample](examples/csv)). Adjust business hours, holidays, SLA, topics and plan prices with
 [`workspace.example.json`](workspace.example.json) and `SA_CONFIG_PATH`.
 
-**Live data:** push batches to `POST /api/ingest` with an API key, or let the API re-import a folder on a schedule.
+**Live data:** send each chat or DM message to `POST /api/webhook/message` as it happens (a ready [n8n workflow](examples/n8n/forward-support-messages.json) is included), push batches to `POST /api/ingest`, or let the API re-import a folder on a schedule. See [LIVE.md](docs/LIVE.md).
 
 **Docker:** `docker build -t customer-support-analytics . && docker run -p 8000:8000 customer-support-analytics`
 
@@ -62,13 +63,14 @@ pytest                                              # 38 tests
 | GET | `/api/contacts.csv` | Same filters as CSV (spreadsheet-safe) |
 | GET | `/api/contacts/{id}` | Transcript with automated messages flagged |
 | GET | `/api/trend` · `/api/funnel` · `/api/breakdown/{topics\|agents\|tiers}` | Charts and breakdowns |
+| POST | `/api/webhook/message` | Live feed: one message or a list, idempotent (API key required) |
 | POST | `/api/ingest` · `/api/sync` | Push data · run the configured source (API key required) |
 | GET | `/api/sync/status` · `/api/config` · `/health` | Last runs and watermark · active configuration · liveness |
 
 ## Security
 
 - The ingest and sync endpoints are **off unless API keys are configured**; keys are compared in constant time.
-- Payload size limits and full validation; messages must refer to known members.
+- Payload size limits and full validation; messages must refer to known members. Errors never echo submitted data.
 - **CSV export is protected against formula injection** (cells starting with `=`, `+`, `-`, `@` are escaped).
 - Sync is an upsert that **never deletes**; failed runs roll back and are recorded.
 - Security headers on every response; CORS is closed unless origins are configured.
@@ -84,8 +86,8 @@ support_analytics/
   eval/        exact scenarios + invariants runner
 web/           dashboard
 tests/         mirrors the package: analytics/ ingest/ api/ eval/
-docs/          metric definitions, data formats
-examples/csv/  a working sample export
+docs/          metric definitions and fairness, data formats, live connection
+examples/      a working CSV export, an n8n webhook workflow
 ```
 
 ## Related

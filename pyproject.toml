@@ -1,6 +1,6 @@
 [project]
 name = "customer-support-analytics"
-version = "2.0.0"
+version = "2.1.0"
 description = "Support analytics for any community or helpdesk: contacts, business-hours response times, SLA, open-chat queue, topics, upgrades and revenue, with bring-your-own-data import and a dashboard."
 readme = "README.md"
 license = { text = "MIT" }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0
+
+- **Live webhook** `POST /api/webhook/message`: one message or a list per call, members created on first sight,
+  idempotent on redelivery, an optional `automated` flag from the platform, and an n8n workflow template.
+- **Fairness:** agents, topics and plans with fewer than 10 contacts are flagged as too few to compare; the rules
+  are documented in METRICS.md.
+- Member email is optional (chats and DMs often have none); updates never blank out a known name or email.
+- Validation errors never echo submitted data.
+
 ## 2.0.0
 
 - **Contacts:** threads are split into contacts when a member returns after a reply and a quiet gap.
