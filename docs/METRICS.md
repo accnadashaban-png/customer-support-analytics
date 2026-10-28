@@ -54,3 +54,26 @@ not a plan question). Anything unmatched is `other`.
 
 All timestamps are stored in UTC; inputs with an offset are converted, inputs without one are rejected.
 The dashboard shows times in the viewer's local time zone; business-time maths uses the team's time zone.
+
+## Fairness
+
+The numbers are used to judge people, so the rules lean toward fairness on both sides.
+
+**Fair to the team**
+
+- Time outside working hours, weekends and holidays is not counted against anyone (business minutes).
+- Automated replies never count as a reply, so a bot cannot make the team look faster, and a slow bot cannot make it look slower.
+- A closing "thanks" does not put a contact back in the queue.
+- Broadcasts and reminders are not contacts.
+- Agents, topics and plans with fewer than 10 contacts are shown but marked **few contacts**: too few to compare fairly.
+
+**Fair to customers**
+
+- Unanswered contacts count as SLA breaches once they pass the target; they are never left out of the rate.
+- A returning member starts a new contact, so a fast reply weeks ago cannot hide a slow one today.
+- Waiting time is shown live, oldest first, with an alert.
+
+**Read with care**
+
+- "Upgraded after support" means within the window after a contact, not *because of* it.
+- First-reply credit goes to whoever replied first; compare agents within the same topic, since some topics take longer.
