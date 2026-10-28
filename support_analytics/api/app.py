@@ -21,7 +21,7 @@ from typing import Any, Literal
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from pydantic import ValidationError
+from pydantic import AwareDatetime, BaseModel, Field, ValidationError, model_validator
 
 from support_analytics.analytics import reports
 from support_analytics.analytics.contacts import Contact, as_dicts, broadcast_threads, compute_contacts, parse
@@ -34,6 +34,32 @@ from support_analytics.ingest.sync import run_periodically, source_from_spec, st
 
 WEB = ROOT / "web" / "index.html"
 View = Literal["all", "last30", "waiting", "upgraded", "breached"]
+MAX_WEBHOOK_EVENTS = 500
+
+
+class WebhookMember(BaseModel):
+    id: str = Field(min_length=1, max_length=128)
+    name: str = Field("", max_length=200)
+    email: str = Field("", max_length=320)
+    joined_at: AwareDatetime | None = None
+
+
+class WebhookMessage(BaseModel):
+    """One chat or DM message, as a website chat, a DM bridge or an automation tool sends it."""
+    message_id: str = Field(min_length=1, max_length=128)
+    conversation_id: str = Field(min_length=1, max_length=128)
+    sender: Literal["member", "agent"]
+    agent_name: str | None = Field(None, max_length=120)
+    body: str = Field(max_length=20_000)
+    sent_at: AwareDatetime
+    automated: bool | None = None
+    member: WebhookMember
+
+    @model_validator(mode="after")
+    def agent_named(self) -> WebhookMessage:
+        if self.sender == "agent" and not self.agent_name and not self.automated:
+            raise ValueError("agent messages need agent_name, or automated: true")
+        return self
 
 
 def _csv_safe(value: Any) -> Any:
@@ -198,9 +224,7 @@ def create_app(settings: Settings | None = None, config: WorkspaceConfig | None 
         with lock:
             return sync(con, source_from_spec(settings.sync_source))
 
-    @app.post("/api/ingest")
-    async def ingest(request: Request) -> dict[str, Any]:
-        """Push members, messages and subscriptions from any system. Re-sending the same data changes nothing."""
+    async def read_body(request: Request) -> bytes:
         require_key(request)
         declared = int(request.headers.get("content-length") or 0)
         if declared > settings.max_ingest_bytes:
@@ -208,23 +232,67 @@ def create_app(settings: Settings | None = None, config: WorkspaceConfig | None 
         body = await request.body()
         if len(body) > settings.max_ingest_bytes:
             raise HTTPException(413, "payload too large")
+        return body
+
+    def invalid(exc: Exception) -> HTTPException:
+        # never echo the submitted values back: they can hold personal data
+        detail = (exc.errors(include_url=False, include_context=False, include_input=False)
+                  if isinstance(exc, ValidationError) else "invalid JSON body")
+        return HTTPException(422, detail)
+
+    @app.post("/api/ingest")
+    async def ingest(request: Request) -> dict[str, Any]:
+        """Push members, messages and subscriptions from any system. Re-sending the same data changes nothing."""
+        body = await read_body(request)
         try:
             data = json.loads(body)
             batch = Batch([Member.model_validate(m) for m in data.get("members", [])],
                           [Message.model_validate(m) for m in data.get("messages", [])],
                           [Subscription.model_validate(s) for s in data.get("subscriptions", [])])
         except (ValueError, AttributeError) as exc:
-            detail = exc.errors(include_url=False) if isinstance(exc, ValidationError) else "invalid JSON body"
-            raise HTTPException(422, detail) from exc
+            raise invalid(exc) from exc
         with lock:
             try:
                 return store_batch(con, batch)
             except sqlite3.IntegrityError as exc:
                 raise HTTPException(422, "every message and subscription must refer to a member in the store or in the batch") from exc
 
+    @app.post("/api/webhook/message")
+    async def webhook(request: Request) -> dict[str, Any]:
+        """Live feed: one message (or a list) per call, as it happens. Unknown members are created on first sight,
+        known ones keep their join date. Delivering the same message twice changes nothing."""
+        body = await read_body(request)
+        try:
+            data = json.loads(body)
+            items = data if isinstance(data, list) else [data]
+            if len(items) > MAX_WEBHOOK_EVENTS:
+                raise HTTPException(413, f"at most {MAX_WEBHOOK_EVENTS} messages per call")
+            events = [WebhookMessage.model_validate(item) for item in items]
+        except (ValueError, AttributeError) as exc:
+            raise invalid(exc) from exc
+        with lock:
+            members: dict[str, Member] = {}
+            for e in sorted(events, key=lambda e: e.sent_at):
+                if e.member.id in members:
+                    continue
+                known = con.execute("SELECT 1 FROM members WHERE id = ?", (e.member.id,)).fetchone()
+                try:
+                    members[e.member.id] = Member(id=e.member.id, name=e.member.name or ("" if known else e.member.id),
+                                                  email=e.member.email, joined_at=e.member.joined_at or e.sent_at)
+                except ValidationError as exc:
+                    raise invalid(exc) from exc
+            messages = [Message(id=e.message_id, conversation_id=e.conversation_id, member_id=e.member.id, sender=e.sender,
+                                agent_name=e.agent_name, body=e.body, sent_at=e.sent_at, automated=e.automated) for e in events]
+            result = store_batch(con, Batch(list(members.values()), messages, []))
+        return {**result, "received": len(events)}
+
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:
         return FileResponse(WEB)
+
+    @app.get("/favicon.svg", include_in_schema=False)
+    def favicon() -> FileResponse:
+        return FileResponse(WEB.parent / "favicon.svg", media_type="image/svg+xml")
 
     return app
 
