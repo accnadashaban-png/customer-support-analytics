@@ -4,39 +4,62 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Support Analytics</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root { --bg:#F7F5F0; --card:#fff; --fg:#172033; --muted:#556070; --line:#E6E2DA; --accent:#0F766E; --soft:#E3F2EF; --coral:#B4532A; --coralbg:#FBE9DF; --good:#047857; --bad:#B91C1C; --badbg:#FEE2E2; --auto:#94A3B8; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#0D1620; --card:#132130; --fg:#E6EDF3; --muted:#9FB0C0; --line:#213244; --accent:#5EEAD4; --soft:#12302F; --coral:#F9A77F; --coralbg:#2B1E18; --good:#34D399; --bad:#FCA5A5; --badbg:#3B1A1A; --auto:#64748B; } }
+  :root {
+    --bg:#F7F4EE; --card:#FFFFFF; --card-2:#FBF9F5; --fg:#1E2A28; --muted:#5B6763; --faint:#8A948F; --line:#E6E0D5;
+    --accent:#1F5A4F; --accent-hover:#174840; --soft:#E4EEE9; --sand:#EFE6D8; --warm:#9A5B1E; --warmbg:#F6EBDC;
+    --good:#1F7A4D; --bad:#A12C2C; --badbg:#FBEAEA; --auto:#A8B0AC;
+    --shadow:0 1px 2px rgba(30,42,40,.04), 0 8px 24px rgba(30,42,40,.06);
+    --font:"Inter", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --bg:#121917; --card:#1A2421; --card-2:#17201D; --fg:#E6ECE9; --muted:#9AA8A3; --faint:#74827D; --line:#2A3632;
+    --accent:#7CC4AE; --accent-hover:#95D3BF; --soft:#1F3530; --sand:#2A2F26; --warm:#E8B07A; --warmbg:#2E261C;
+    --good:#6FCF97; --bad:#F4A3A3; --badbg:#3A1E1E; --auto:#56635E;
+    --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.25);
+  } }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 Inter, system-ui, "Segoe UI", Arial, sans-serif; }
-  main { max-width:1240px; margin:0 auto; padding:22px 16px 48px; }
-  header { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-  h1 { font-size:22px; margin:0; } .sub { color:var(--muted); margin:2px 0 0; }
-  .chip { display:inline-flex; gap:6px; align-items:center; padding:4px 10px; border-radius:999px; background:var(--soft); color:var(--accent); font-size:12px; font-weight:600; }
-  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); gap:10px; margin-bottom:14px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; }
-  .kpi span { color:var(--muted); font-size:12px; } .kpi b { display:block; font-size:24px; margin-top:2px; } .kpi small { color:var(--muted); font-size:12px; }
-  .grid { display:grid; grid-template-columns:3fr 2fr; gap:12px; margin-bottom:12px; } @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
-  h2 { font-size:14px; margin:0 0 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-  table { width:100%; border-collapse:collapse; } th,td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--line); white-space:nowrap; }
-  th { color:var(--muted); font-size:12px; font-weight:600; } .scroll { overflow-x:auto; } tbody tr.click { cursor:pointer; } tbody tr.click:hover { background:var(--bg); }
-  .tabs { display:flex; gap:6px; flex-wrap:wrap; } .tabs button, select, input, .btn { border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:6px 10px; font:inherit; font-size:13px; }
-  .tabs button, .btn { cursor:pointer; } .tabs button.on { background:var(--accent); border-color:var(--accent); color:var(--card); }
-  .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
-  .pill { padding:2px 8px; border-radius:999px; font-size:12px; } .alert { background:var(--badbg); color:var(--bad); font-weight:600; } .up { background:var(--coralbg); color:var(--coral); } .ok { color:var(--good); } .late { color:var(--bad); font-weight:600; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14.5px/1.55 var(--font); -webkit-font-smoothing:antialiased; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; }
+  .top { position:sticky; top:0; z-index:4; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .top .in { max-width:1240px; margin:0 auto; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:650; letter-spacing:-.01em; } .brand svg { width:28px; height:28px; }
+  main { max-width:1240px; margin:0 auto; padding:28px 24px 56px; }
+  header { margin-bottom:22px; }
+  h1 { font-size:26px; line-height:1.2; letter-spacing:-.02em; font-weight:600; margin:0; } .sub { color:var(--muted); margin:6px 0 0; max-width:720px; }
+  .chip { display:inline-flex; gap:8px; align-items:center; padding:5px 12px; border-radius:999px; background:var(--card); border:1px solid var(--line); color:var(--muted); font-size:12.5px; font-weight:500; }
+  .chip::before { content:""; width:7px; height:7px; border-radius:50%; background:#2E9C74; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px 20px; box-shadow:var(--shadow); }
+  .kpi span { color:var(--muted); font-size:12.5px; font-weight:500; } .kpi b { display:block; font-size:28px; font-weight:650; letter-spacing:-.02em; margin:4px 0 2px; font-variant-numeric:tabular-nums; } .kpi small { color:var(--faint); font-size:12.5px; }
+  .grid { display:grid; grid-template-columns:3fr 2fr; gap:16px; margin-bottom:16px; } @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+  h2 { font-size:15px; font-weight:650; margin:0 0 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; } th,td { text-align:start; padding:9px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  tbody tr:last-child td { border-bottom:0; }
+  th { color:var(--muted); font-size:12px; font-weight:600; background:var(--card-2); } th:first-child { border-start-start-radius:10px; } th:last-child { border-start-end-radius:10px; }
+  .scroll { overflow-x:auto; } tbody tr.click { cursor:pointer; } tbody tr.click:hover { background:var(--card-2); }
+  .tabs { display:inline-flex; gap:2px; flex-wrap:wrap; background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:3px; }
+  .tabs button { border:0; background:none; color:var(--muted); border-radius:9px; padding:5px 11px; font:inherit; font-size:13px; cursor:pointer; }
+  .tabs button:hover { color:var(--fg); } .tabs button.on { background:var(--card); color:var(--fg); font-weight:600; box-shadow:0 1px 2px rgba(30,42,40,.08); }
+  select, input, .btn { border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:10px; padding:7px 11px; font:inherit; font-size:13px; }
+  input:focus, select:focus { outline:0; border-color:var(--accent); }
+  .btn { cursor:pointer; text-decoration:none; font-weight:550; } .btn:hover { border-color:var(--accent); }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+  .pill { padding:2px 9px; border-radius:999px; font-size:12px; font-weight:500; } .alert { background:var(--badbg); color:var(--bad); font-weight:600; } .up { background:var(--warmbg); color:var(--warm); } .ok { color:var(--good); } .late { color:var(--bad); font-weight:600; }
   .bar { height:10px; border-radius:6px; background:var(--accent); } .barwrap { background:var(--soft); border-radius:6px; }
-  svg text { fill:var(--muted); font-size:11px; } .meta { font-size:11px; color:var(--muted); } .empty { color:var(--muted); padding:8px 0; }
-  #drawer { position:fixed; inset:0 0 0 auto; width:min(460px,100vw); background:var(--card); border-left:1px solid var(--line); padding:18px; overflow-y:auto; transform:translateX(100%); transition:transform .2s; box-shadow:-8px 0 30px rgba(0,0,0,.15); z-index:5; }
+  svg text { fill:var(--muted); font-size:11px; } .meta { font-size:12px; color:var(--faint); font-weight:400; } tr.few td { opacity:.6; } .empty { color:var(--muted); padding:8px 0; }
+  #drawer { position:fixed; inset:0 0 0 auto; width:min(480px,100vw); background:var(--card); border-inline-start:1px solid var(--line); padding:22px; overflow-y:auto; transform:translateX(100%); transition:transform .2s; box-shadow:-8px 0 30px rgba(0,0,0,.12); z-index:5; }
   #drawer.open { transform:none; } #drawer .close { float:right; border:0; background:none; color:var(--muted); font-size:18px; cursor:pointer; }
-  .bubble { padding:8px 10px; border-radius:10px; margin:6px 0; max-width:90%; } .member { background:var(--bg); } .agent { background:var(--soft); margin-left:auto; } .auto { border:1px dashed var(--auto); color:var(--muted); margin-left:auto; }
-  footer { color:var(--muted); font-size:12px; margin-top:16px; }
+  .bubble { padding:9px 12px; border-radius:14px; margin:8px 0; max-width:90%; } .member { background:var(--sand); } .agent { background:var(--soft); margin-left:auto; } .auto { border:1px dashed var(--auto); color:var(--muted); margin-left:auto; }
+  footer { color:var(--faint); font-size:12.5px; margin-top:18px; }
 </style>
 </head>
 <body>
+<div class="top"><div class="in"><div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path fill="var(--bg)" d="M30 12C31.6 24.6 37.4 30.4 50 32C37.4 33.6 31.6 39.4 30 52C28.4 39.4 22.6 33.6 10 32C22.6 30.4 28.4 24.6 30 12Z"/><path fill="var(--bg)" opacity=".7" d="M48 8C48.6 12.6 50.4 14.4 55 15C50.4 15.6 48.6 17.4 48 22C47.4 17.4 45.6 15.6 41 15C45.6 14.4 47.4 12.6 48 8Z"/></svg><span>Support Analytics</span></div><span class="chip" id="sync">Loading…</span></div></div>
 <main>
   <header>
-    <div><h1>Support Analytics</h1><p class="sub">How fast your team replies, who is still waiting, and what support is worth. Times shown in your local time zone.</p></div>
-    <span class="chip" id="sync">Loading…</span>
+    <h1>Team overview</h1><p class="sub">How fast your team replies, who is still waiting, and what support is worth. Times are shown in your local time zone.</p>
   </header>
 
   <section class="kpis" aria-label="Key metrics, last 30 days">
@@ -80,7 +103,7 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const local = (iso) => iso ? new Date(iso).toLocaleString([], {dateStyle: "medium", timeStyle: "short"}) : "–";
   const dur = (m) => m == null ? "–" : m < 60 ? `${Math.round(m)} min` : m < 1440 ? `${(m / 60).toFixed(1)} h` : `${(m / 1440).toFixed(1)} d`;
-  const biz = (m) => m == null ? "–" : m < 60 ? `${Math.round(m)} min` : `${(m / 60).toFixed(1)} business h`;
+  const biz = (m) => m == null ? "–" : m < 60 ? `${Math.round(m)} min` : m < 600 ? `${(m / 60).toFixed(1)} business h` : `${Math.round(m / 60)} business h`;
   const pct = (x) => x == null ? "–" : `${(x * 100).toFixed(1)}%`;
   const get = (url) => fetch(url).then((r) => r.json());
   let view = "last30", dim = "topics", cfg = {};
@@ -120,7 +143,7 @@
   async function loadDim() {
     const rows = await get(`/api/breakdown/${dim}?days=30`), key = {topics: "topic", agents: "agent", tiers: "tier_at_contact"}[dim];
     $("dim-h").textContent = {topics: "Topic", agents: "Agent", tiers: "Plan at contact"}[dim];
-    $("dim").innerHTML = rows.map((r) => `<tr><td>${esc(r[key])}</td><td>${r.contacts}</td><td>${pct(r.reply_rate)}</td><td>${biz(r.median_first_response_business_min)}</td><td>${pct(r.sla_met_rate)}</td></tr>`).join("");
+    $("dim").innerHTML = rows.map((r) => `<tr${r.low_sample ? ' class="few" title="Fewer than 10 contacts: too few to compare fairly"' : ""}><td>${esc(r[key])}${r.low_sample ? ' <span class="meta">· few contacts</span>' : ""}</td><td>${r.contacts}</td><td>${pct(r.reply_rate)}</td><td>${biz(r.median_first_response_business_min)}</td><td>${pct(r.sla_met_rate)}</td></tr>`).join("");
   }
   function params() {
     const p = new URLSearchParams({view});
