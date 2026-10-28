@@ -61,7 +61,8 @@ def upsert(con: sqlite3.Connection, members: Iterable[Member], messages: Iterabl
         with con:
             con.executemany(
                 "INSERT INTO members VALUES (:id, :name, :email, :joined_at) ON CONFLICT(id) DO UPDATE SET "
-                "name = excluded.name, email = excluded.email",
+                "name = CASE WHEN excluded.name <> '' THEN excluded.name ELSE members.name END, "
+                "email = CASE WHEN excluded.email <> '' THEN excluded.email ELSE members.email END",
                 [{**m.model_dump(), "joined_at": utc_iso(m.joined_at)} for m in members])
             con.executemany(
                 "INSERT INTO messages VALUES (:id, :conversation_id, :member_id, :sender, :agent_name, :body, :sent_at, "

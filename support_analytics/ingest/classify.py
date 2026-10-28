@@ -32,5 +32,7 @@ class AutomationClassifier:
         """True if an agent-side message was sent automatically. Member messages are never automated."""
         if message.sender != "agent":
             return False
+        if message.automated is not None:  # the platform said so
+            return message.automated
         text = _squash(message.body)
         return any(p.search(text) for p in self.patterns)

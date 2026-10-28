@@ -15,7 +15,7 @@ TIERS = ["Free", "Basic", "Pro", "Elite"]  # default order, lowest to highest; o
 class Member(BaseModel):
     id: str = Field(min_length=1, max_length=128)
     name: str = Field(max_length=200)
-    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", max_length=320)
+    email: str = Field("", pattern=r"^$|^[^@\s]+@[^@\s]+\.[^@\s]+$", max_length=320)  # optional: chats and DMs often have none
     joined_at: AwareDatetime
 
 
@@ -27,6 +27,7 @@ class Message(BaseModel):
     agent_name: str | None = Field(None, max_length=120)
     body: str = Field(max_length=20_000)
     sent_at: AwareDatetime
+    automated: bool | None = None  # set by platforms that know a message was automatic; otherwise detected from the text
 
 
 class Subscription(BaseModel):
