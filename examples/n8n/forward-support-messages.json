@@ -1,0 +1,84 @@
+{
+  "name": "Forward support messages to Customer Support Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-message",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "6b1f2c1e-0d5e-4a43-9a51-1f6f3c2a7a01",
+      "name": "Incoming message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "support-message"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Adjust the names on the right to the fields your chat or DM platform sends.\n// If it sends Unix seconds, use new Date(m.timestamp * 1000).\nreturn $input.all().map((item) => {\n  const m = item.json.body ?? item.json;\n  const fromTeam = Boolean(m.from_staff);\n  return { json: {\n    message_id: String(m.id),\n    conversation_id: String(m.thread_id),\n    sender: fromTeam ? \"agent\" : \"member\",\n    agent_name: fromTeam ? (m.staff_name ?? null) : null,\n    automated: m.is_auto_reply ?? null,\n    body: m.text ?? \"\",\n    sent_at: new Date(m.timestamp).toISOString(),\n    member: { id: String(m.customer_id), name: m.customer_name ?? \"\", email: m.customer_email ?? \"\" },\n  } };\n});"
+      },
+      "id": "6b1f2c1e-0d5e-4a43-9a51-1f6f3c2a7a02",
+      "name": "Map to analytics format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPPORT_ANALYTICS_URL }}/api/webhook/message",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "6b1f2c1e-0d5e-4a43-9a51-1f6f3c2a7a03",
+      "name": "Send to analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3
+    }
+  ],
+  "connections": {
+    "Incoming message": {
+      "main": [
+        [
+          {
+            "node": "Map to analytics format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map to analytics format": {
+      "main": [
+        [
+          {
+            "node": "Send to analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
