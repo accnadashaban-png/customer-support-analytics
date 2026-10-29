@@ -15,7 +15,8 @@ class Settings(BaseSettings):
 
     db_path: Path = ROOT / "data" / "support.db"
     config_path: Path | None = Field(None, description="workspace JSON: business hours, SLA, topics, prices")
-    # Where scheduled syncs read from: "synthetic", "csv:<folder>" or "json:<file>". Empty disables the scheduler.
+    # Where scheduled syncs read from: "synthetic", "csv:<folder>", "json:<file>", "mapped:<export>|<mapping.json>"
+    # (any chat export) or "sql:<connection.json>" (your database, read-only). Empty disables the scheduler.
     sync_source: str = ""
     sync_interval_s: int = Field(0, ge=0)
     # Keys allowed to push data to POST /api/ingest. Empty list disables the endpoint.
