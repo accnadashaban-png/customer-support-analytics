@@ -3,7 +3,7 @@
 [![CI](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![Metric eval](https://img.shields.io/badge/metric%20eval-14%20scenarios%20%C2%B7%2025%20datasets-success) ![Topics](https://img.shields.io/badge/topic%20accuracy-90.9%25%20on%20unseen%20labels-success) ![License](https://img.shields.io/badge/license-MIT-green)
 
-Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Bring your own data as CSV or JSON, or connect a website chat or DMs live through a webhook.
+Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Connect **your own data as it is**: any chat or helpdesk export through a column-mapping file, your own database through a read-only connection, or a website chat and DMs live through a webhook.
 
 ![Dashboard: KPIs, the open queue sorted by business-time waiting, and the support funnel](docs/dashboard.jpg)
 
@@ -44,10 +44,10 @@ python -m support_analytics eval     # scenarios 14/14 (79 checks), invariants 2
 pip install -e ".[dev]"
 python -m support_analytics sync                    # demo data (run it twice: nothing changes)
 uvicorn support_analytics.api.app:app               # dashboard on http://127.0.0.1:8000
-pytest                                              # 51 tests
+pytest                                              # 61 tests
 ```
 
-**Your own data:** `python -m support_analytics sync --csv ./my-export` with the three CSVs described in [DATA.md](docs/DATA.md)
+**Your own data, as it is:** `python -m support_analytics sync --file chats.csv --mapping my-mapping.json` reads any export (CSV or nested JSON, your column names, your time zone), and `sync --sql my-database.json` reads your own database read-only (SQLite or PostgreSQL, one SELECT per table). See [CONNECT.md](docs/CONNECT.md) and [examples/connect](examples/connect). Or use the three CSVs described in [DATA.md](docs/DATA.md):
 ([sample](examples/csv)). Adjust business hours, holidays, SLA, topics and plan prices with
 [`workspace.example.json`](workspace.example.json) and `SA_CONFIG_PATH`.
 

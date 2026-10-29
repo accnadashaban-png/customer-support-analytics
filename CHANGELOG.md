@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.0
+
+- **Connect any export as it is:** a JSON mapping file names your columns, how your export spells customer and
+  agent, and your time zone; CSV or nested JSON (dotted paths), ISO, epoch or custom timestamps, generated message
+  ids, optional plan changes. Errors name the row. `sync --file chats.csv --mapping map.json`.
+- **Connect your database, read-only:** one SELECT per table against your own schema; single-SELECT check, SQLite
+  opened with `mode=ro`, PostgreSQL read-only transactions, a row cap. `sync --sql connection.json`, optional
+  `postgres` extra.
+- Both work on a schedule inside the API (`SA_SYNC_SOURCE=mapped:...` or `sql:...`) for a live view.
+- Examples in `examples/connect/` (helpdesk CSV, chat-platform JSON, database connection) and docs/CONNECT.md.
+- 61 tests.
+
 ## 2.2.0
 
 - **Topic classification you can trust:** scored over every member message of a contact (not only the first),
