@@ -3,24 +3,24 @@
     "id": "bot-is-not-a-reply",
     "rule": "An automated verification code 30 seconds after the member writes is not the first response.",
     "messages": [
-      ["c1", "m1", "member", null, "I can't log in", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "member", null, "I can't log in to my account", "2026-10-04T10:00:00Z"],
       ["c1", "m1", "agent", "Sara", "Your verification code is 482913", "2026-10-04T10:00:30Z"],
       ["c1", "m1", "agent", "Omar", "Fixed, please try again", "2026-10-04T10:30:00Z"]
     ],
     "now": "2026-10-04T12:00:00Z",
     "expect": {"c1#1": {"replied": true, "first_response_min": 30.0, "first_response_business_min": 30.0, "agent": "Omar",
-                        "sla_met": true, "sla_breached": false, "waiting": false, "topic": "access"}}
+                        "sla_met": true, "sla_breached": false, "waiting": false, "topic": "account"}}
   },
   {
     "id": "after-hours-counts-business-time",
     "rule": "Thursday 17:50 to Sunday 09:10 is 63h20m on the calendar but 20 business minutes (Sun-Thu 09:00-18:00).",
     "messages": [
-      ["c1", "m1", "member", null, "How do I join the live session?", "2026-10-01T17:50:00Z"],
+      ["c1", "m1", "member", null, "When will the technician come to install my line?", "2026-10-01T17:50:00Z"],
       ["c1", "m1", "agent", "Mona", "Here is the link", "2026-10-04T09:10:00Z"]
     ],
     "now": "2026-10-04T12:00:00Z",
     "expect": {"c1#1": {"first_response_min": 3800.0, "first_response_business_min": 20.0, "sla_met": true,
-                        "topic": "events"}}
+                        "topic": "installation"}}
   },
   {
     "id": "unanswered-breaches-sla-and-alerts",
@@ -44,13 +44,13 @@
     "id": "returning-member-is-a-new-contact",
     "rule": "The member comes back two days after a reply: a second contact with its own response time.",
     "messages": [
-      ["c1", "m1", "member", null, "Login problem", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "member", null, "Login problem with my account", "2026-10-04T10:00:00Z"],
       ["c1", "m1", "agent", "Omar", "Done", "2026-10-04T10:20:00Z"],
       ["c1", "m1", "member", null, "I need an invoice for my payment", "2026-10-06T11:00:00Z"],
       ["c1", "m1", "agent", "Sara", "Sent", "2026-10-06T13:00:00Z"]
     ],
     "now": "2026-10-07T10:00:00Z",
-    "expect": {"c1#1": {"first_response_min": 20.0, "topic": "access", "sla_met": true},
+    "expect": {"c1#1": {"first_response_min": 20.0, "topic": "account", "sla_met": true},
                "c1#2": {"first_response_min": 120.0, "first_response_business_min": 120.0, "agent": "Sara",
                         "sla_met": false, "sla_breached": true, "topic": "billing"}},
     "expect_kpis": {"contacts": 2, "replied": 2, "sla_breaches": 1, "sla_met_rate": 0.5}
@@ -96,7 +96,7 @@
     "id": "upgrade-to-trial-counts-with-revenue",
     "rule": "Basic to Pro trial five days after the contact is an upgrade worth 29 - 9 = 20 per month.",
     "messages": [
-      ["c1", "m1", "member", null, "What's the difference between Pro and Elite?", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "member", null, "What's the difference between the Pro and Elite plans?", "2026-10-04T10:00:00Z"],
       ["c1", "m1", "agent", "Omar", "Pro adds...", "2026-10-04T10:15:00Z"]
     ],
     "subscriptions": [["m1", "Basic", "active", "2026-09-01T00:00:00Z"], ["m1", "Pro", "trial", "2026-10-09T10:00:00Z"]],
@@ -129,11 +129,11 @@
     "rule": "Dubai team (UTC+4): a message at 08:30 local answered at 09:30 local is 60 calendar but 30 business minutes.",
     "config": {"business_hours": {"timezone": "Asia/Dubai"}},
     "messages": [
-      ["c1", "m1", "member", null, "Hi, the video is not working", "2026-10-04T04:30:00Z"],
+      ["c1", "m1", "member", null, "Hi, the internet is not working", "2026-10-04T04:30:00Z"],
       ["c1", "m1", "agent", "Mona", "Try now", "2026-10-04T05:30:00Z"]
     ],
     "now": "2026-10-04T12:00:00Z",
-    "expect": {"c1#1": {"first_response_min": 60.0, "first_response_business_min": 30.0, "topic": "technical"}}
+    "expect": {"c1#1": {"first_response_min": 60.0, "first_response_business_min": 30.0, "topic": "connection"}}
   },
   {
     "id": "holidays-are-not-business-time",
@@ -150,12 +150,12 @@
     "id": "first-human-agent-gets-the-credit",
     "rule": "The first human reply is credited, not later ones.",
     "messages": [
-      ["c1", "m1", "member", null, "الفيديو مش بيشتغل عندي", "2026-10-04T10:00:00Z"],
+      ["c1", "m1", "member", null, "النت مش شغال عندي", "2026-10-04T10:00:00Z"],
       ["c1", "m1", "agent", "Mona", "جاري المراجعة", "2026-10-04T10:12:00Z"],
       ["c1", "m1", "agent", "Omar", "اتحلت", "2026-10-04T11:00:00Z"]
     ],
     "now": "2026-10-04T12:00:00Z",
-    "expect": {"c1#1": {"agent": "Mona", "first_response_min": 12.0, "topic": "technical"}}
+    "expect": {"c1#1": {"agent": "Mona", "first_response_min": 12.0, "topic": "connection"}}
   },
   {
     "id": "local-time-input-is-normalized",
