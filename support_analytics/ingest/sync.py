@@ -16,15 +16,23 @@ logger = logging.getLogger("support_analytics.sync")
 
 
 def source_from_spec(spec: str) -> Source:
-    """'synthetic' (or 'synthetic:<customers>'), 'csv:<folder>' or 'json:<file>'."""
+    """'synthetic' (or 'synthetic:<customers>'), 'csv:<folder>', 'json:<file>', 'mapped:<export>|<mapping.json>'
+    (any chat export) or 'sql:<connection.json>' (your database, read-only)."""
     kind, _, target = spec.partition(":")
+    if kind == "mapped" and "|" in target:
+        from support_analytics.ingest.connectors import MappedFileSource
+        data, mapping = target.split("|", 1)
+        return MappedFileSource(Path(data), Path(mapping))
+    if kind == "sql" and target:
+        from support_analytics.ingest.connectors import SqlSource
+        return SqlSource(Path(target))
     if kind == "synthetic":
         return SyntheticSource(members=int(target), days=120) if target.isdigit() else SyntheticSource()
     if kind == "csv" and target:
         return CsvSource(Path(target))
     if kind == "json" and target:
         return JsonSource(Path(target))
-    raise ValueError(f"unknown source {spec!r}; use synthetic, csv:<folder> or json:<file>")
+    raise ValueError(f"unknown source {spec!r}; use synthetic, csv:<folder>, json:<file>, mapped:<export>|<mapping> or sql:<file>")
 
 
 def store_batch(con: sqlite3.Connection, batch: Batch, classifier: AutomationClassifier | None = None) -> dict[str, Any]:
