@@ -148,7 +148,7 @@ def create_app(settings: Settings | None = None, config: WorkspaceConfig | None 
         return {"timezone": bh.timezone, "business_days": {d: f"{h.start}-{h.end}" for d, h in bh.days.items()},
                 "holidays": [str(h) for h in bh.holidays], "sla_first_response_minutes": cfg.sla_first_response_minutes,
                 "contact_gap_hours": cfg.contact_gap_hours, "upgrade_window_days": cfg.upgrade_window_days,
-                "alert_after_minutes": cfg.alert_after_minutes, "topics": sorted(cfg.topics) + ["other"],
+                "alert_after_minutes": cfg.alert_after_minutes, "topics": sorted(cfg.topics) + ["uncertain", "other"],
                 "tiers": cfg.tier_order, "currency": cfg.currency}
 
     @app.get("/api/kpis")
