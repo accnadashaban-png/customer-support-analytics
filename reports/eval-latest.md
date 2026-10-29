@@ -1,9 +1,9 @@
 # Metric evaluation
 
-Generated 2026-10-28 16:51.
+Generated 2026-10-29 05:29.
 
 **Scenarios:** 14/14 passed (79 exact checks)  
-**Invariants:** 25/25 synthetic datasets passed (127 contacts each on average)
+**Invariants:** 25/25 synthetic datasets passed (132 contacts each on average)
 
 | Scenario | Rule | Result |
 |---|---|---|
@@ -25,3 +25,34 @@ Generated 2026-10-28 16:51.
 ## Invariant failures
 
 None.
+
+## Topic classification (hand-labeled)
+
+| | Development half | Test half (the number to trust) |
+|---|---|---|
+| Contacts | 88 | 88 |
+| Accuracy (uncertain counts as wrong) | 100.0% | 90.9% |
+| Accuracy when it decides | 100.0% | 93.0% |
+| Coverage (decided, not uncertain) | 100.0% | 97.7% |
+
+| Topic | Precision (test) | Recall (test) | Contacts (test) |
+|---|---|---|---|
+| account | 100% | 91% | 11 |
+| billing | 100% | 91% | 11 |
+| cancellation | 100% | 73% | 11 |
+| connection | 91% | 91% | 11 |
+| device | 100% | 82% | 11 |
+| installation | 100% | 100% | 11 |
+| other | 69% | 100% | 11 |
+| plans | 100% | 100% | 11 |
+
+Test-half mistakes (label -> classifier):
+
+- `L011` billing -> **connection**: عايز أسترجع فلوس الأيام اللي النت كان فاصل فيها
+- `L033` cancellation -> **other**: لو لغيت هيتخصم مني حاجة؟
+- `L041` cancellation -> **uncertain**: عايز الغي الباقة خالص
+- `L043` cancellation -> **other**: كيف بوقف الخدمة نهائيًا؟
+- `L087` connection -> **other**: هل يوجد عطل في الشبكة؟
+- `L129` device -> **other**: كيف أغير كلمة مرور الشبكة اللاسلكية؟
+- `L131` device -> **uncertain**: الوايفاي ضعيف في الشقة
+- `L151` account -> **other**: كيف أغير كلمة المرور؟
