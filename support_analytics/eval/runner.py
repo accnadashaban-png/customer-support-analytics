@@ -2,6 +2,7 @@
 
 1. Scenarios (`scenarios/scenarios.json`): small, hand-computed cases, one rule each. Every expected field
    must match exactly.
+3. Topic classification accuracy on hand-labeled contacts (see topics_eval.py); the test half must stay >= 90%.
 2. Invariants: properties that must hold for any data, checked on many seeded synthetic datasets
    (for example: business time never exceeds calendar time, a met SLA is within target, re-syncing changes nothing).
 
@@ -21,6 +22,7 @@ from support_analytics.analytics import reports
 from support_analytics.analytics.contacts import Contact, broadcast_threads, compute_contacts, parse
 from support_analytics.core.config import WorkspaceConfig
 from support_analytics.core.settings import ROOT
+from support_analytics.eval import topics_eval
 from support_analytics.ingest.classify import AutomationClassifier
 from support_analytics.ingest.models import Member, Message, Subscription, tier_rank
 from support_analytics.ingest.sources import SyntheticSource
@@ -135,15 +137,19 @@ def main(report: Path = ROOT / "reports" / "eval-latest") -> int:
     lines += [f"| `{r['id']}` | {r['rule']} | {'pass' if r['passed'] else 'FAIL: ' + '; '.join(r['failures'])} |" for r in scenarios]
     failed = [r for r in invariants if not r["passed"]]
     lines += ["", "## Invariant failures", ""] + ([f"- seed {r['seed']}: {r['violations']}" for r in failed] or ["None."])
+    dev, test = (topics_eval.evaluate(half) for half in topics_eval.split(topics_eval.load()))
+    lines += [""] + topics_eval.markdown(dev, test)
+    topics_ok = test["accuracy"] >= 0.9
     report.parent.mkdir(parents=True, exist_ok=True)
     report.with_suffix(".md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"scenarios {s_ok}/{len(scenarios)} ({checks} checks), invariants {i_ok}/{len(invariants)}")
+    print(f"scenarios {s_ok}/{len(scenarios)} ({checks} checks), invariants {i_ok}/{len(invariants)}, "
+          f"topics test half {test['accuracy']:.1%} (decided {test['coverage']:.1%})")
     for r in scenarios:
         if not r["passed"]:
             print("FAIL", r["id"], r["failures"])
     for r in failed:
         print("INVARIANT", r["seed"], r["violations"])
-    return 0 if s_ok == len(scenarios) and i_ok == len(invariants) else 1
+    return 0 if s_ok == len(scenarios) and i_ok == len(invariants) and topics_ok else 1
 
 
 if __name__ == "__main__":

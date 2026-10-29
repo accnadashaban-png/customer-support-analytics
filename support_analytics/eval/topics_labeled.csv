@@ -1,0 +1,177 @@
+id,label,language,messages
+L001,billing,en,Why is my bill higher this month?
+L002,billing,eg,الفاتورة جاية أعلى من كل شهر ليه؟
+L003,billing,en,I was charged twice for October
+L004,billing,eg,اتخصم مني مرتين من الكارت
+L005,billing,gulf,أبي فاتورة الشهر الماضي
+L006,billing,en,Hi || I paid yesterday but the app still says unpaid
+L007,billing,lev,دفعت الفاتورة وما وصلني إيصال
+L008,billing,franco,el fatora gaya ghalya awy leh?
+L009,billing,msa,أرجو إرسال نسخة من الفاتورة الأخيرة
+L010,billing,en,Can I get a refund for the days I had no service?
+L011,billing,eg,عايز أسترجع فلوس الأيام اللي النت كان فاصل فيها
+L012,billing,en,How do I pay with a different card?
+L013,billing,mag,خلصت الفاتورة ولكن مازال كيبان عندي مبلغ
+L014,billing,eg,ازاي ادفع الفاتوره من الابلكيشن؟
+L015,billing,en,There's a late fee on my invoice that I don't understand
+L016,billing,eg,السلام عليكم || في رسوم زيادة على فاتورتي
+L017,billing,mixed,عايز الـ invoice بتاعة شهر سبتمبر
+L018,billing,en,payment failed again
+L019,billing,gulf,انخصم مني مبلغ زيادة
+L020,billing,en,Where can I download my receipts?
+L021,billing,eg,دفعت مرتين بالغلط
+L022,billing,msa,هل يمكن تقسيط المبلغ المستحق؟
+L023,cancellation,en,How do I cancel my subscription?
+L024,cancellation,eg,عايز ألغي الاشتراك
+L025,cancellation,en,Please terminate my contract at the end of the month
+L026,cancellation,gulf,أبي ألغي الخدمة
+L027,cancellation,lev,بدي بلغي الاشتراك تبعي
+L028,cancellation,franco,3ayez a2lel el eshterak
+L029,cancellation,msa,أرغب في إنهاء التعاقد
+L030,cancellation,en,I'm moving abroad and want to close my account
+L031,cancellation,eg,مش عايز الخدمة دي تاني اقفلولي الخط
+L032,cancellation,en,Hello || what's the cancellation fee?
+L033,cancellation,eg,لو لغيت هيتخصم مني حاجة؟
+L034,cancellation,en,unsubscribe me please
+L035,cancellation,mag,بغيت نلغي الاشتراك ديالي
+L036,cancellation,mixed,عايز أعمل cancel للخط
+L037,cancellation,en,How can I stop my subscription from renewing?
+L038,cancellation,eg,ازاي الغي التجديد التلقائي
+L039,cancellation,gulf,ودي أوقف الاشتراك نهائي
+L040,cancellation,en,I want to cancel. The service is terrible.
+L041,cancellation,eg,عايز الغي الباقة خالص
+L042,cancellation,msa,كيف يمكنني إلغاء الخدمة؟
+L043,cancellation,lev,كيف بوقف الخدمة نهائيًا؟
+L044,cancellation,en,Can you cancel my line from next month
+L045,plans,en,How much is the 500 Mbps plan?
+L046,plans,eg,الباقة الأسرع بكام؟
+L047,plans,en,I want to upgrade to a faster plan
+L048,plans,gulf,وش العروض اللي عندكم الحين؟
+L049,plans,lev,قديش سعر الباقة الكبيرة؟
+L050,plans,franco,el ba2a el kbira b kam?
+L051,plans,msa,ما الفرق بين باقة Pro وباقة Elite؟
+L052,plans,en,Is there a student discount?
+L053,plans,eg,عايز أرقي باقتي
+L054,plans,en,Can I downgrade to a cheaper package?
+L055,plans,mag,شحال ثمن الباقة ديال 200؟
+L056,plans,eg,في عروض على الباقات الشهر ده؟
+L057,plans,mixed,عايز أعمل upgrade للباقة
+L058,plans,en,What offers do you have for new customers?
+L059,plans,eg,هو في باقة أرخص من دي؟
+L060,plans,gulf,أبي أرقي لباقة أسرع
+L061,plans,en,Do you have a bundle with TV?
+L062,plans,msa,ما أسعار الباقات المتاحة؟
+L063,plans,en,Hi there || which plan is best for gaming?
+L064,plans,eg,ينفع اغير الباقة لباقة اكبر؟
+L065,plans,lev,بدي رقي الاشتراك
+L066,plans,en,how much for 1 Gbps
+L067,connection,en,My internet is down since this morning
+L068,connection,eg,النت فاصل من الصبح
+L069,connection,en,The internet keeps dropping every few minutes
+L070,connection,eg,النت بيقطع كل شوية
+L071,connection,gulf,النت مقطوع عندي
+L072,connection,lev,الإنترنت بطيء كتير اليوم
+L073,connection,franco,el net msh shaghal
+L074,connection,msa,الاتصال بالإنترنت ضعيف جدًا
+L075,connection,en,Very slow speed in the evenings
+L076,connection,eg,السرعة ضعيفة جدا مش زي الباقة
+L077,connection,en,Is there an outage in Maadi?
+L078,connection,mag,الأنترنيت واقف عندي
+L079,connection,eg,السلام عليكم || النت واقع عندنا في المنطقة
+L080,connection,en,High ping when I play online
+L081,connection,mixed,النت بيعمل disconnect كتير
+L082,connection,en,No internet at all
+L083,connection,eg,النتتتت مش شغاااال
+L084,connection,gulf,الانترنت ضعيف مرة
+L085,connection,en,speed test shows 10 mbps only
+L086,connection,eg,النت بطيئ جدا النهارده
+L087,connection,msa,هل يوجد عطل في الشبكة؟
+L088,connection,en,The connection is lagging a lot
+L089,installation,en,When will the technician come to install my line?
+L090,installation,eg,الفني هييجي امتى يركب الخط؟
+L091,installation,en,I'm moving next week. Can you move my line to the new address?
+L092,installation,eg,عايز انقل الخط لعنوان جديد
+L093,installation,gulf,متى موعد التركيب؟
+L094,installation,lev,إيمتى بيجي الفني؟
+L095,installation,franco,el fanni gay emta?
+L096,installation,msa,أرغب في حجز موعد لتركيب خط جديد
+L097,installation,en,I need a new line for my office
+L098,installation,eg,عايز خط جديد في الشقة
+L099,installation,en,The technician didn't show up for the appointment
+L100,installation,eg,الفني ماجاش في الميعاد
+L101,installation,mag,فوقاش غادي يجي التقني يركب؟
+L102,installation,en,Can I reschedule the installation visit?
+L103,installation,eg,ممكن اغير ميعاد الزيارة؟
+L104,installation,mixed,عايز أعمل booking لميعاد التركيب
+L105,installation,en,How long does installation take after I sign up?
+L106,installation,gulf,أبي أنقل الخط لبيتي الجديد
+L107,installation,msa,متى تتم زيارة الفني؟
+L108,installation,en,Hello || I just signed up. When do you install?
+L109,installation,eg,التركيب بياخد قد ايه؟
+L110,installation,lev,بدي ركب خط جديد
+L111,device,en,The router has a red light
+L112,device,eg,الراوتر فيه لمبة حمرا
+L113,device,en,How do I change my wifi password?
+L114,device,eg,عايز اغير باسورد الواي فاي
+L115,device,gulf,الراوتر ما يشتغل
+L116,device,lev,كيف بغير اسم الشبكة؟
+L117,device,franco,el router feh lamba 7amra
+L118,device,msa,جهاز الراوتر لا يعمل
+L119,device,en,Wifi doesn't reach my bedroom
+L120,device,eg,الواي فاي مش واصل للأوضة
+L121,device,en,My modem keeps restarting
+L122,device,eg,الراوتر بيفصل ويرجع لوحده
+L123,device,mag,الراوتر ديالي فيه مشكل
+L124,device,en,Can I get a second router?
+L125,device,eg,ازاي اعمل ريستارت للراوتر؟
+L126,device,mixed,الـ router مش بيطلع wifi
+L127,device,en,The cable from the router is broken
+L128,device,gulf,أبي أغير اسم الواي فاي
+L129,device,msa,كيف أغير كلمة مرور الشبكة اللاسلكية؟
+L130,device,en,All lights on the router are off
+L131,device,eg,الوايفاي ضعيف في الشقة
+L132,device,lev,الراوتر عم يسخن كتير
+L133,account,en,I can't log in to the app
+L134,account,eg,مش قادر ادخل على الحساب
+L135,account,en,I forgot my password
+L136,account,eg,نسيت باسورد الابلكيشن
+L137,account,gulf,ما أقدر أدخل التطبيق
+L138,account,lev,ما عم بقدر فوت عالحساب
+L139,account,franco,msh 3aref a3mel login
+L140,account,msa,لا أستطيع تسجيل الدخول إلى حسابي
+L141,account,en,I didn't receive the verification code
+L142,account,eg,الكود مش بيوصلني
+L143,account,en,How do I change the email on my account?
+L144,account,eg,عايز اغير رقم الموبايل اللي على الحساب
+L145,account,mag,ما قدرتش ندخل للحساب ديالي
+L146,account,mixed,الـ app مش راضي يعمل login
+L147,account,en,Can someone else manage my account?
+L148,account,eg,عايز اغير الايميل
+L149,account,en,The app says my account is locked
+L150,account,gulf,نسيت كلمة السر
+L151,account,msa,كيف أغير كلمة المرور؟
+L152,account,en,Hi || OTP never arrives
+L153,account,eg,الحساب اتقفل ليه؟
+L154,account,lev,ما وصلني الكود
+L155,other,en,Hi
+L156,other,eg,السلام عليكم
+L157,other,en,Thanks!
+L158,other,eg,شكرا جدا
+L159,other,en,Are you hiring?
+L160,other,eg,هو انتو شغالين يوم الجمعة؟
+L161,other,en,Do you sponsor events?
+L162,other,gulf,وين فرعكم؟
+L163,other,en,I want to speak to a manager
+L164,other,eg,عايز اكلم حد
+L165,other,lev,شو اسم الشركة الأم؟
+L166,other,en,good morning
+L167,other,franco,salam
+L168,other,msa,ما عنوان المقر الرئيسي؟
+L169,other,en,Where is your nearest branch?
+L170,other,eg,ممكن رقم خدمة العملاء؟
+L171,other,en,ok
+L172,other,mag,شكرا بزاف
+L173,other,en,Do you have a careers page?
+L174,other,eg,انا عايز اشتكي من موظف
+L175,other,en,What are your working hours?
+L176,other,gulf,تمام مشكور
