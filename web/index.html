@@ -3,28 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try { const t = localStorage.getItem("sa-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <title>Support Analytics</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
   :root {
-    --bg:#F7F4EE; --card:#FFFFFF; --card-2:#FBF9F5; --fg:#1E2A28; --muted:#5B6763; --faint:#8A948F; --line:#E6E0D5;
-    --accent:#1F5A4F; --accent-hover:#174840; --soft:#E4EEE9; --sand:#EFE6D8; --warm:#9A5B1E; --warmbg:#F6EBDC;
-    --good:#1F7A4D; --bad:#A12C2C; --badbg:#FBEAEA; --auto:#A8B0AC;
-    --shadow:0 1px 2px rgba(30,42,40,.04), 0 8px 24px rgba(30,42,40,.06);
-    --font:"Inter", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bg:#F4F7FB; --card:#FFFFFF; --card-2:#F7F9FC; --fg:#0F1B2D; --muted:#4F6178; --faint:#8494AA; --line:#DCE4EE;
+    --accent:#0E7490; --accent-hover:#0B5E75; --on-accent:#FFFFFF; --soft:#E0F2F7; --sand:#EEF2F8; --warm:#B45309; --warmbg:#FDF1E1;
+    --good:#15803D; --bad:#B91C1C; --badbg:#FDECEC; --auto:#A3B1C4;
+    --navy:#0F2A4A;
+    --shadow:0 1px 2px rgba(15,27,45,.05), 0 8px 24px rgba(15,27,45,.07); color-scheme:light;
+    --font:"Segoe UI Variable Text", "Segoe UI", "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
   }
-  @media (prefers-color-scheme: dark) { :root {
-    --bg:#121917; --card:#1A2421; --card-2:#17201D; --fg:#E6ECE9; --muted:#9AA8A3; --faint:#74827D; --line:#2A3632;
-    --accent:#7CC4AE; --accent-hover:#95D3BF; --soft:#1F3530; --sand:#2A2F26; --warm:#E8B07A; --warmbg:#2E261C;
-    --good:#6FCF97; --bad:#F4A3A3; --badbg:#3A1E1E; --auto:#56635E;
-    --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.25);
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg:#0B1220; --card:#111A2E; --card-2:#0E1628; --fg:#E6EDF7; --muted:#9AA9C2; --faint:#6E7F9C; --line:#22304A;
+    --accent:#22D3EE; --accent-hover:#67E8F9; --on-accent:#06202A; --soft:#0F2A3A; --sand:#1A2338; --warm:#FBBF24; --warmbg:#2B2412;
+    --good:#4ADE80; --bad:#F87171; --badbg:#3A1620; --auto:#4B5B78;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); color-scheme:dark;
   } }
+  :root[data-theme="dark"] {
+    --bg:#0B1220; --card:#111A2E; --card-2:#0E1628; --fg:#E6EDF7; --muted:#9AA9C2; --faint:#6E7F9C; --line:#22304A;
+    --accent:#22D3EE; --accent-hover:#67E8F9; --on-accent:#06202A; --soft:#0F2A3A; --sand:#1A2338; --warm:#FBBF24; --warmbg:#2B2412;
+    --good:#4ADE80; --bad:#F87171; --badbg:#3A1620; --auto:#4B5B78;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); color-scheme:dark;
+  }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:14.5px/1.55 var(--font); -webkit-font-smoothing:antialiased; }
   :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; }
   .top { position:sticky; top:0; z-index:4; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
   .top .in { max-width:1240px; margin:0 auto; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .brand { display:flex; align-items:center; gap:10px; font-weight:650; letter-spacing:-.01em; } .brand svg { width:28px; height:28px; }
+  .right { display:flex; align-items:center; gap:10px; }
+  .theme { border:1px solid var(--line); background:var(--card); color:var(--muted); border-radius:10px; width:34px; height:34px; display:grid; place-items:center; cursor:pointer; }
+  .theme:hover { color:var(--fg); border-color:var(--accent); } .theme svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
+  .unsure { background:var(--warmbg); color:var(--warm); }
+  @media (max-width:640px) { main { padding:18px 14px 40px; } .top .in { padding:10px 14px; } h1 { font-size:22px; } .kpi b { font-size:24px; }
+    .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; } .card { padding:14px; border-radius:14px; } .chip { display:none; } }
   main { max-width:1240px; margin:0 auto; padding:28px 24px 56px; }
   header { margin-bottom:22px; }
   h1 { font-size:26px; line-height:1.2; letter-spacing:-.02em; font-weight:600; margin:0; } .sub { color:var(--muted); margin:6px 0 0; max-width:720px; }
@@ -56,10 +70,10 @@
 </style>
 </head>
 <body>
-<div class="top"><div class="in"><div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path fill="var(--bg)" d="M30 12C31.6 24.6 37.4 30.4 50 32C37.4 33.6 31.6 39.4 30 52C28.4 39.4 22.6 33.6 10 32C22.6 30.4 28.4 24.6 30 12Z"/><path fill="var(--bg)" opacity=".7" d="M48 8C48.6 12.6 50.4 14.4 55 15C50.4 15.6 48.6 17.4 48 22C47.4 17.4 45.6 15.6 41 15C45.6 14.4 47.4 12.6 48 8Z"/></svg><span>Support Analytics</span></div><span class="chip" id="sync">Loading…</span></div></div>
+<div class="top"><div class="in"><div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path fill="var(--bg)" d="M30 12C31.6 24.6 37.4 30.4 50 32C37.4 33.6 31.6 39.4 30 52C28.4 39.4 22.6 33.6 10 32C22.6 30.4 28.4 24.6 30 12Z"/><path fill="var(--bg)" opacity=".7" d="M48 8C48.6 12.6 50.4 14.4 55 15C50.4 15.6 48.6 17.4 48 22C47.4 17.4 45.6 15.6 41 15C45.6 14.4 47.4 12.6 48 8Z"/></svg><span>Support Analytics</span></div><div class="right"><span class="chip" id="sync">Loading…</span><button class="theme" id="theme" type="button" aria-label="Switch light or dark theme" title="Light / dark"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button></div></div></div>
 <main>
   <header>
-    <h1>Team overview</h1><p class="sub">How fast your team replies, who is still waiting, and what support is worth. Times are shown in your local time zone.</p>
+    <h1>Team overview</h1><p class="sub">How fast your team replies, who is still waiting, what customers ask about, and what support is worth. Demo data: Wasla, a fictional home-internet provider with 5,000 customers and 8 agents. Times are shown in your local time zone.</p>
   </header>
 
   <section class="kpis" aria-label="Key metrics, last 30 days">
@@ -107,6 +121,11 @@
   const pct = (x) => x == null ? "–" : `${(x * 100).toFixed(1)}%`;
   const get = (url) => fetch(url).then((r) => r.json());
   let view = "last30", dim = "topics", cfg = {};
+  document.getElementById("theme").onclick = () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("sa-theme", document.documentElement.dataset.theme); } catch (e) {}
+  };
 
   async function loadKpis() {
     const k = await get("/api/kpis?days=30");
@@ -120,7 +139,7 @@
     const q = await get("/api/queue");
     $("k-wait").textContent = q.length; $("k-alerts").textContent = `${q.filter((r) => r.alert).length} past the alert threshold · right now`;
     $("queue").innerHTML = q.slice(0, 12).map((r) => `<tr class="click" data-id="${esc(r.contact_id)}"><td>${esc(r.member_name)}<div class="meta">${esc(r.email)}</div></td>
-      <td>${esc(r.topic)}</td><td>${r.alert ? `<span class="pill alert">${biz(r.waiting_business_min)}</span>` : biz(r.waiting_business_min)}</td>
+      <td>${r.topic === "uncertain" ? `<span class="pill unsure">uncertain</span>` : esc(r.topic)}</td><td>${r.alert ? `<span class="pill alert">${biz(r.waiting_business_min)}</span>` : biz(r.waiting_business_min)}</td>
       <td dir="auto">${esc(r.first_message.slice(0, 60))}</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nobody is waiting. 🎉</td></tr>`;
   }
   async function loadFunnel() {
@@ -157,7 +176,7 @@
     const data = await get("/api/contacts?" + p);
     $("count").textContent = `${data.total} contacts`;
     $("rows").innerHTML = data.rows.map((r) => `<tr class="click" data-id="${esc(r.contact_id)}">
-      <td>${esc(r.member_name)}<div class="meta">${esc(r.email)}</div></td><td>${local(r.first_message_at)}</td><td>${esc(r.topic)}</td>
+      <td>${esc(r.member_name)}<div class="meta">${esc(r.email)}</div></td><td>${local(r.first_message_at)}</td><td>${r.topic === "uncertain" ? `<span class="pill unsure">uncertain</span>` : esc(r.topic)}</td>
       <td>${r.replied ? `${biz(r.first_response_business_min)}` : `<span class="late">not answered</span>`}</td>
       <td>${r.sla_breached ? `<span class="late">breached</span>` : r.sla_met ? `<span class="ok">met</span>` : "–"}</td>
       <td>${esc(r.agent || "–")}</td>
@@ -165,7 +184,7 @@
   }
   async function openContact(id) {
     const d = await get("/api/contacts/" + encodeURIComponent(id)), c = d.contact;
-    $("detail").innerHTML = `<h2>${esc(c.member_name)}</h2><p class="meta">${esc(c.email)} · ${esc(c.topic)} · plan at contact ${esc(c.tier_at_contact)}, now ${esc(c.current_tier)}</p>
+    $("detail").innerHTML = `<h2>${esc(c.member_name)}</h2><p class="meta">${esc(c.email)} · ${esc(c.topic)}${c.topic_confidence ? ` (${Math.round(c.topic_confidence * 100)}% sure)` : ""} · plan at contact ${esc(c.tier_at_contact)}, now ${esc(c.current_tier)}</p>
       <p>First response: <b>${c.replied ? `${biz(c.first_response_business_min)} (${dur(c.first_response_min)} on the clock)` : "not answered yet"}</b>${c.agent ? ` by ${esc(c.agent)}` : ""}</p>` +
       d.messages.map((m) => `<div class="bubble ${m.sender === "member" ? "member" : m.is_automated ? "auto" : "agent"}" dir="auto">${esc(m.body)}
         <div class="meta">${m.sender === "member" ? "member" : m.is_automated ? "automated (not counted)" : esc(m.agent_name)} · ${local(m.sent_at)}</div></div>`).join("");
