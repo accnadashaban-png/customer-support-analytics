@@ -16,7 +16,7 @@ KEY = "test-ingest-key"
 def client(demo_db, tmp_path_factory):
     db = tmp_path_factory.mktemp("api") / "support.db"
     db.write_bytes(demo_db.read_bytes())
-    settings = Settings(db_path=db, api_keys=[SecretStr(KEY)], sync_source="synthetic", _env_file=None)  # type: ignore[call-arg]
+    settings = Settings(db_path=db, api_keys=[SecretStr(KEY)], sync_source="synthetic:450", _env_file=None)  # type: ignore[call-arg]
     return TestClient(create_app(settings, clock=lambda: NOW))
 
 
