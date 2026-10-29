@@ -1,0 +1,17 @@
+{
+  "format": "csv",
+  "fields": {
+    "conversation_id": "Ticket ID",
+    "member_id": "Customer ID",
+    "member_name": "Customer",
+    "email": "Customer Email",
+    "sender": "Author Type",
+    "agent_name": "Agent",
+    "body": "Message",
+    "sent_at": "Created At",
+    "automated": "Automated"
+  },
+  "sender_values": {"member": ["customer"], "agent": ["agent"]},
+  "timezone": "Africa/Cairo",
+  "time_format": "%Y-%m-%d %H:%M"
+}

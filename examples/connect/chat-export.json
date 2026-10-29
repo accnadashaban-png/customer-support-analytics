@@ -1,0 +1,10 @@
+{
+  "exported_at": "2026-10-22T08:00:00Z",
+  "data": {
+    "messages": [
+      {"chat": {"id": "wa-501"}, "from": {"role": "user", "id": "201000000001", "name": "Youssef"}, "text": "الراوتر فيه لمبة حمرا", "ts": 1761040800000},
+      {"chat": {"id": "wa-501"}, "from": {"role": "operator", "id": "op-3", "name": "Laila"}, "text": "هبعتلك راوتر جديد خلال يومين.", "ts": 1761042600000},
+      {"chat": {"id": "wa-502"}, "from": {"role": "user", "id": "201000000002", "name": "Reem"}, "text": "When will the technician come?", "ts": 1761127200000}
+    ]
+  }
+}

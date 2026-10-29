@@ -1,0 +1,14 @@
+{
+  "format": "json",
+  "records": "data.messages",
+  "fields": {
+    "conversation_id": "chat.id",
+    "member_id": "from.id",
+    "member_name": "from.name",
+    "sender": "from.role",
+    "agent_name": "from.name",
+    "body": "text",
+    "sent_at": "ts"
+  },
+  "sender_values": {"member": ["user"], "agent": ["operator"]}
+}

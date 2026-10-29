@@ -1,0 +1,7 @@
+{
+  "url": "sqlite:///C:/path/to/helpdesk.db",
+  "messages": "SELECT r.id AS id, t.id AS conversation_id, t.customer_id AS member_id, c.full_name AS member_name, c.email AS email, CASE WHEN r.author_kind = 'staff' THEN 'agent' ELSE 'member' END AS sender, r.author_name AS agent_name, r.content AS body, r.created_at AS sent_at, r.is_bot AS automated FROM replies r JOIN tickets t ON t.id = r.ticket_id JOIN customers c ON c.id = t.customer_id",
+  "subscriptions": "SELECT customer_id AS member_id, plan AS tier, state AS status, changed_at AS started_at FROM plan_changes",
+  "status_values": {"active": ["paid"], "canceled": ["cancelled"]},
+  "timezone": "UTC"
+}

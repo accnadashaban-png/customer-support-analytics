@@ -1,0 +1,8 @@
+Ticket ID,Customer ID,Customer,Customer Email,Author Type,Agent,Message,Created At,Automated
+T-1001,C-77,Mariam Fathy,mariam.f@example.com,customer,,السلام عليكم النت فاصل من الصبح,2026-10-20 09:15,no
+T-1001,C-77,Mariam Fathy,mariam.f@example.com,agent,Support Bot,Your request was received. Ticket T-1001.,2026-10-20 09:15,yes
+T-1001,C-77,Mariam Fathy,mariam.f@example.com,agent,Hana,تم إعادة ضبط الخط من عندنا، جرّب دلوقتي.,2026-10-20 09:42,no
+T-1001,C-77,Mariam Fathy,mariam.f@example.com,customer,,شكرا,2026-10-20 09:50,no
+T-1002,C-78,Omar Nabil,,customer,,How much is the Elite plan?,2026-10-20 17:55,no
+T-1002,C-78,Omar Nabil,,agent,Karim,The Elite plan is 79 USD a month.,2026-10-21 09:20,no
+T-1003,C-79,Salma Adel,salma@example.com,customer,,I was charged twice this month,2026-10-21 11:00,no
