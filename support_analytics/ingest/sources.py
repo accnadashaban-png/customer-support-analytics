@@ -18,17 +18,51 @@ from pydantic import BaseModel
 from support_analytics.ingest.models import TIERS, Member, Message, Subscription
 
 LOCAL = timezone(timedelta(hours=3))  # the source reports local time; storage normalizes to UTC
-AGENTS = ["Sara", "Omar", "Mona", "Youssef"]
+# The demo business: Wasla, a fictional home-internet provider (plans Free = prepaid, Basic 50 Mbps,
+# Pro 200 Mbps, Elite 1 Gbps), with a support team of 8 answering WhatsApp, web chat and email in one inbox.
+AGENTS = ["Sara", "Omar", "Mona", "Youssef", "Hana", "Karim", "Laila", "Tamer"]
 FIRST_NAMES = ["Ahmed", "Fatma", "Khaled", "Nour", "Hassan", "Laila", "Tarek", "Huda", "Karim", "Salma", "Ali", "Rana",
-               "Mostafa", "Dina", "Yara", "Amr", "Mariam", "Hany", "Reem", "Ziad"]
-LAST_NAMES = ["Adel", "Farouk", "Samir", "Lotfy", "Nabil", "Fathy", "Ramzy", "Gamal", "Sabry", "Zaki"]
-QUESTIONS = ["Hi, I can't log in to my account", "How do I join the live session?", "I paid but my plan didn't change",
-             "What's the difference between Pro and Elite?", "Can I get an invoice?", "السلام عليكم، عايز أرقّي اشتراكي",
-             "الفيديو مش بيشتغل عندي", "ممكن أعرف مواعيد اللايف؟", "Is there a student discount?", "How do I cancel?"]
-REPLIES = ["Thanks for reaching out! Let me check that for you.", "Done, please try again now.",
-           "Here's the link with all the details.", "أهلا بيك! تم حل المشكلة، جرّب تاني.", "Sure, I've sent it to your email."]
-AUTOMATED = ["Your verification code is {code}", "Welcome to the community! Start here: ...",
-             "Your membership renews on {date}.", "Reminder: live session starts in 1 hour."]
+               "Mostafa", "Dina", "Yara", "Amr", "Mariam", "Hany", "Reem", "Ziad", "Omnia", "Sherif", "Nada", "Bassem",
+               "Aya", "Hossam", "Menna", "Walid", "Shahd", "Adham"]
+LAST_NAMES = ["Adel", "Farouk", "Samir", "Lotfy", "Nabil", "Fathy", "Ramzy", "Gamal", "Sabry", "Zaki", "Hegazy", "Shawky",
+              "Mansour", "Ezzat", "Badawy"]
+QUESTIONS = {  # what Wasla's customers ask, by topic (a returning customer follows up on the same topic)
+    "connection": ["My internet has been down since this morning", "النت فاصل عندي من امبارح", "The connection drops every evening",
+                   "النت بطيء جدا بالليل", "Speed test shows 20 Mbps on a 200 plan", "el net bey2ta3 kol shwaya",
+                   "الانترنت مقطوع في المنطقة؟"],
+    "device": ["The router shows a red light", "الراوتر فيه لمبة حمرا", "How do I change the wifi password?",
+               "عايز اغير اسم الواي فاي", "Wifi doesn't reach the second floor", "الراوتر بيعيد تشغيل نفسه"],
+    "billing": ["Why is this month's bill higher?", "الفاتورة جاية زيادة ليه؟", "I was charged twice this month", "اتخصم مني مرتين",
+                "Can I get last month's invoice?", "ازاي ادفع الفاتورة من الابلكيشن؟", "I paid but the app still says unpaid"],
+    "plans": ["How much is the Elite plan?", "الباقة الأسرع بكام؟", "I want to upgrade to a faster plan", "عايز ارقي باقتي",
+              "Is there a student discount?", "في عروض على الباقات؟", "What's the difference between Pro and Elite?"],
+    "installation": ["When will the technician come?", "الفني هييجي امتى يركب الخط؟", "I'm moving, can you move my line?",
+                     "عايز انقل الخط لعنوان جديد", "The technician missed the appointment"],
+    "account": ["I can't log in to the app", "نسيت باسورد الابلكيشن", "The verification code never arrives", "عايز اغير الايميل"],
+    "cancellation": ["How do I cancel my subscription?", "عايز الغي الاشتراك", "Please end my contract next month",
+                     "ازاي الغي التجديد التلقائي"],
+}
+TOPIC_WEIGHTS = {"connection": 26, "device": 14, "billing": 18, "plans": 16, "installation": 10, "account": 9, "cancellation": 7}
+FOLLOW_UPS = ["Any update?", "Still waiting on this", "في جديد؟", "لسه مستني رد"]
+OPENERS = ["Hi", "Hello", "السلام عليكم", "مساء الخير", "Good morning"]  # sometimes the first message is only a greeting
+REPLIES = {  # the team's answers, by topic
+    "connection": ["There's maintenance in your area; service is back by 6 pm.", "I've reset your line from our side, please try now.",
+                   "تم إعادة ضبط الخط من عندنا، جرّب دلوقتي."],
+    "device": ["Please restart the router; if the light stays red I'll send a replacement.", "You can change it from the app under Wi-Fi.",
+               "هبعتلك راوتر جديد خلال يومين."],
+    "billing": ["I've refunded the extra charge; it will show in 3-5 days.", "Sure, I've sent the invoice to your email.",
+                "الفاتورة فيها رسوم التركيب لأول شهر بس."],
+    "plans": ["The Elite plan is 79 USD a month, and you can upgrade from the app.", "Students get 20% off with a valid ID.",
+              "تقدر ترقي من الأبلكيشن والسرعة الجديدة تشتغل فورًا."],
+    "installation": ["I've booked a technician visit for tomorrow between 10 and 2.", "Your move is scheduled for Sunday.",
+                     "تمام، الفني هيكلمك قبل ما يوصل."],
+    "account": ["I've reset your password; check your email.", "The code is on its way; it can take a minute.",
+                "تم تحديث الإيميل على حسابك."],
+    "cancellation": ["Done. Your line stays active until the end of the month.", "I've turned off auto-renewal for you.",
+                     "تم الإلغاء، والخدمة شغالة لآخر الشهر."],
+}
+AUTOMATED = ["Your verification code is {code}", "Welcome to Wasla! Your line is now active.",
+             "Your membership renews on {date}.", "Reminder: your technician visit is tomorrow."]
 
 
 @dataclass
@@ -95,10 +129,11 @@ class CsvSource:
 
 
 class SyntheticSource:
-    """Seeded generator: members, support DMs (with bots and broadcasts), and tier changes."""
+    """Seeded generator for the demo business (Wasla): customers, support chats with bots, greetings, broadcasts,
+    returning customers and plan changes. 5,000 customers over 12 months by default."""
 
-    def __init__(self, seed: int = 7, members: int = 450, end: datetime = datetime(2026, 10, 23, 18, tzinfo=UTC),
-                 days: int = 120):
+    def __init__(self, seed: int = 7, members: int = 5000, end: datetime = datetime(2026, 10, 23, 18, tzinfo=UTC),
+                 days: int = 365):
         self.rng, self.n, self.end, self.days = random.Random(seed), members, end, days
 
     def _reply_delay(self, at: datetime) -> timedelta:
@@ -143,33 +178,44 @@ class SyntheticSource:
                 if at > self.end - timedelta(hours=1):
                     continue
                 seq = 0
+                topic = rng.choices(list(TOPIC_WEIGHTS), weights=list(TOPIC_WEIGHTS.values()))[0]
+                if rng.random() < 0.15:  # "Hi" first, the real question a minute later
+                    batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(OPENERS), at, seq))
+                    at += timedelta(minutes=1)
+                    seq += 1
                 if rng.random() < 0.3:  # an automated message arrives right after the member writes
-                    batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS), at, seq))
+                    batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS[topic]), at, seq))
                     at += timedelta(seconds=20)
                     seq += 1
                     batch.messages.append(self._msg(cid, mid, "agent", "Sara", rng.choice(AUTOMATED), at, seq))
                 else:
-                    batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS), at, seq))
+                    batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS[topic]), at, seq))
                 seq += 1
-                if rng.random() < 0.9:  # 10% are still unanswered
+                last = at
+                recent = at > self.end - timedelta(days=3)
+                if rng.random() < (0.85 if recent else 0.999):  # a few recent contacts are still open; almost no old one is forgotten
                     reply_at = self._reply_at(at)
                     if reply_at < self.end:
-                        batch.messages.append(self._msg(cid, mid, "agent", rng.choice(AGENTS), rng.choice(REPLIES),
+                        batch.messages.append(self._msg(cid, mid, "agent", rng.choice(AGENTS), rng.choice(REPLIES[topic]),
                                                         reply_at, seq))
                         seq += 1
+                        last = reply_at
                         if rng.random() < 0.35:
                             follow = reply_at + timedelta(minutes=rng.randint(2, 600))
                             if follow < self.end:
                                 batch.messages.append(self._msg(cid, mid, "member", None, "Thanks!", follow, seq))
+                                seq += 1  # every message needs its own id
+                                last = follow
                 if rng.random() < 0.25:  # the member comes back days later in the same thread: a new contact
-                    back = at + timedelta(days=rng.uniform(1, 6))
+                    back = last + timedelta(days=rng.uniform(1, 6))  # always after the conversation so far
                     if back < self.end - timedelta(hours=2):
-                        batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS), back, seq))
+                        batch.messages.append(self._msg(cid, mid, "member", None, rng.choice(QUESTIONS[topic] + FOLLOW_UPS), back,
+                                                        seq))
                         seq += 1
-                        if rng.random() < 0.85:
+                        if rng.random() < (0.85 if back > self.end - timedelta(days=3) else 0.999):
                             again = self._reply_at(back)
                             if again < self.end:
-                                batch.messages.append(self._msg(cid, mid, "agent", rng.choice(AGENTS), rng.choice(REPLIES),
+                                batch.messages.append(self._msg(cid, mid, "agent", rng.choice(AGENTS), rng.choice(REPLIES[topic]),
                                                                 again, seq))
                                 seq += 1
                 if rng.random() < 0.16 and tier != "Elite":  # upgrade after support

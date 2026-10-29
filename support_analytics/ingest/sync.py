@@ -16,10 +16,10 @@ logger = logging.getLogger("support_analytics.sync")
 
 
 def source_from_spec(spec: str) -> Source:
-    """'synthetic', 'csv:<folder>' or 'json:<file>'."""
+    """'synthetic' (or 'synthetic:<customers>'), 'csv:<folder>' or 'json:<file>'."""
     kind, _, target = spec.partition(":")
     if kind == "synthetic":
-        return SyntheticSource()
+        return SyntheticSource(members=int(target), days=120) if target.isdigit() else SyntheticSource()
     if kind == "csv" and target:
         return CsvSource(Path(target))
     if kind == "json" and target:

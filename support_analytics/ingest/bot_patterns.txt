@@ -11,3 +11,5 @@ your (membership|subscription) (expires|will expire)
 كود التحقق( الخاص بك)? (هو )?\d{4,8}
 ^أهلا بيك في المجتمع
 اشتراكك هيتجدد
+^welcome to wasla
+^reminder: your technician visit
