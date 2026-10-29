@@ -39,9 +39,33 @@ took 63 h 20 min on the calendar and **20 business minutes**.
 
 ## Topics
 
-The contact's first message is matched against a keyword taxonomy (English and Arabic, configurable).
-Topics are checked in order, so more specific ones come first ("cancel my subscription" is a cancellation,
-not a plan question). Anything unmatched is `other`.
+A topic is **scored**, not guessed (`analytics/topics.py`):
+
+1. Text is normalized the way people type: lower case, Arabic letter variants unified (أ إ آ → ا, ة → ه, ى → ي),
+   diacritics and stretched letters removed ("النتتتت" → "النت").
+2. **Every member message of the contact** counts, not only the first ("Hi" followed by the real question is common).
+   The first message that says something weighs 1.5x; greetings and a closing "thanks" weigh nothing.
+3. Each topic's words add points when they appear as words; Arabic words may carry the usual prefixes and suffixes
+   ("وفاتورتي" matches "فاتورة"). A phrase of several words = 2 points, a word = 1, a weak word marked `~` = 0.5
+   (words like "plan" or "subscription" appear in many kinds of requests).
+4. The best topic wins only if it scores at least `topic_min_ratio` (default 1.5) times the runner-up. Otherwise the
+   contact is **uncertain** and is left for a person to label, instead of being counted under a wrong topic.
+   No topic words at all: `other`.
+5. **Confidence** = winner / (winner + runner-up): 0.5 is a tie, 1.0 means no other topic was mentioned.
+
+**Accuracy** is measured on 176 hand-labeled contacts (`eval/topics_labeled.csv`: English, five Arabic dialects,
+Franco, mixed, typos, multi-message). The keywords were tuned on the even half only, then frozen, then measured
+once on the odd half:
+
+| | Development half | Unseen half |
+|---|---|---|
+| Accuracy (uncertain counts as wrong) | 100% | **90.9%** |
+| Accuracy when it decides | 100% | 93.0% |
+| Decided (not uncertain) | 100% | 97.7% |
+
+On the unseen half, precision is 100% for six of the seven topics (91% for connection): when it names a topic it is
+almost always right; its misses go to `other` or `uncertain`, which a person reviews. `python -m support_analytics eval`
+recomputes this and fails CI below 90%.
 
 ## Upgrades and revenue
 
