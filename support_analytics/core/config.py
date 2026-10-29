@@ -59,16 +59,33 @@ class BusinessHours(BaseModel):
         return ZoneInfo(self.timezone)
 
 
-# Checked in order, so more specific topics come first ("cancel my subscription" is a cancellation).
+# Topics of the demo business, Wasla (a fictional home-internet provider). Scored, not checked in order: see
+# analytics/topics.py. A phrase counts 2, a word 1, a "~weak" word 0.5. Replace them with your own business's words.
 DEFAULT_TOPICS = {
-    "access": ["log in", "login", "password", "can't access", "verification", "account", "دخول", "باسورد", "كلمة السر",
-               "مش قادر ادخل", "الحساب"],
-    "billing": ["paid", "payment", "invoice", "refund", "charge", "card", "دفعت", "الدفع", "فاتورة", "استرجاع", "فلوس"],
-    "cancellation": ["cancel", "unsubscribe", "stop my", "الغاء", "إلغاء", "الغي", "ألغي"],
-    "plans": ["upgrade", "plan", "pro", "elite", "basic", "discount", "price", "ارقي", "أرقي", "ترقية", "الباقة", "اشتراك",
-              "خصم", "سعر"],
-    "events": ["live", "session", "webinar", "schedule", "اللايف", "لايف", "مواعيد", "الجلسة"],
-    "technical": ["video", "not working", "error", "bug", "app", "crash", "الفيديو", "مش بيشتغل", "مشكلة", "التطبيق"],
+    "billing": ["invoice", "invoices", "bill", "bills", "receipt", "receipts", "unpaid", "charged", "charge", "overcharged",
+                "double charged", "refund", "payment",
+                "paid", "pay", "card", "fatora", "daf3", "فاتورة", "فلوس", "اتخصم", "انخصم", "اتسحب", "دفعت", "الدفع",
+                "ادفع", "سداد", "مبلغ", "استرجاع", "استرداد", "رسوم", "~price"],
+    "cancellation": ["cancel", "cancellation", "unsubscribe", "terminate", "end my contract", "close my account",
+                     "stop my subscription", "a2lel", "elghaa", "الغاء", "الغي", "نلغي", "بلغي", "يلغي", "انهاء التعاقد",
+                     "اقفل الخط", "اوقف الاشتراك", "مش عايز الخدمه"],
+    "plans": ["upgrade", "downgrade", "plan", "plans", "package", "packages", "bundle", "mbps", "offer", "offers", "discount", "student",
+              "how much", "price", "prices", "faster plan", "ba2a", "arakki", "باقه", "باقات", "ارقي", "رقي", "ترقيه",
+              "اغير الباقه", "عرض", "عروض", "خصم", "سعر", "اسعار", "بكام", "قديش", "شحال", "~subscription", "~اشتراك"],
+    "connection": ["no internet", "internet is down", "internet down", "not working", "slow", "disconnect",
+                   "disconnects", "disconnecting", "outage", "lag", "lagging", "connection", "ping", "speed test",
+                   "keeps dropping", "el net",
+                   "النت", "الانترنت", "الانترنيت", "مقطوع", "واقف", "بيقطع", "فاصل", "بطيء", "بطيئ", "بطئ", "ضعيف", "مش شغال", "واقع",
+                   "~speed", "~السرعه"],
+    "installation": ["install", "installation", "technician", "visit", "appointment", "new line", "activate my line",
+                     "moving", "move my line", "new address", "relocate", "تركيب", "فني", "الفني", "ميعاد", "زياره",
+                     "خط جديد", "انقل الخط", "نقل الخط", "عنوان جديد", "ركب", "يركب", "fanni"],
+    "device": ["router", "modem", "wifi", "wi fi", "wireless", "red light", "lights", "ont", "cable", "wifi password",
+               "wifi name", "راوتر", "الراوتر", "واي فاي", "الواي فاي", "وايفاي", "لمبه", "اللمبه حمرا", "الكابل",
+               "باسورد الواي فاي", "اسم الشبكه", "router"],
+    "account": ["log in", "login", "sign in", "password", "~the app", "account", "email", "phone number",
+                "verification code", "otp", "حساب", "الحساب", "الابلكيشن", "التطبيق", "باسورد", "كلمه السر",
+                "دخول", "ادخل", "الكود", "ايميل"],
 }
 
 
@@ -79,6 +96,7 @@ class WorkspaceConfig(BaseModel):
     upgrade_window_days: int = Field(14, ge=1)
     alert_after_minutes: int = Field(120, ge=1, description="flag unanswered contacts older than this (business minutes)")
     topics: dict[str, list[str]] = Field(default_factory=lambda: dict(DEFAULT_TOPICS))
+    topic_min_ratio: float = Field(1.5, ge=1.0, description="the top topic must score this many times the runner-up")
     closing_phrases: list[str] = Field(default_factory=lambda: [
         "thanks", "thank you", "thx", "ok", "okay", "great", "perfect", "شكرا", "شكرًا", "متشكر", "تمام", "تسلم", "مشكور"])
     tier_order: list[str] = Field(default_factory=lambda: ["Free", "Basic", "Pro", "Elite"])
