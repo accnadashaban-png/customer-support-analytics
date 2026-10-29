@@ -42,9 +42,10 @@ def test_unknown_time_zone_and_weekday_are_rejected() -> None:
 
 
 @pytest.mark.parametrize("text,topic", [
-    ("I can't log in", "access"), ("عايز ألغي الاشتراك", "cancellation"), ("Is there a student discount?", "plans"),
-    ("الفيديو مش بيشتغل", "technical"), ("Can I get an invoice?", "billing"), ("مواعيد اللايف؟", "events"),
-    ("hello there", "other"),
+    ("I can't log in", "account"), ("عايز ألغي الاشتراك", "cancellation"), ("Is there a student discount?", "plans"),
+    ("النت مش شغال", "connection"), ("Can I get an invoice?", "billing"), ("الفني هييجي امتى؟", "installation"),
+    ("الراوتر فيه لمبة حمرا", "device"), ("hello there", "other"), ("ازاي ادفع الفاتوره؟", "billing"),
+    ("وفاتورتي جت غلط", "billing"), ("النتتتت فاصل", "connection"),
 ])
 def test_topics(text, topic) -> None:
     assert classify_topic(text, WorkspaceConfig().topics) == topic
@@ -84,3 +85,22 @@ def test_custom_plans_and_prices() -> None:
     cfg = WorkspaceConfig(tier_order=["Free", "Starter", "Team"], monthly_price={"Free": 0, "Starter": 15, "Team": 45})
     c = compute_contacts(con, cfg, now=t(20, 10))[0]
     assert (c.upgraded_to, c.mrr_gain) == ("Team", 30.0)
+
+
+def test_topic_reads_the_whole_contact_and_admits_doubt() -> None:
+    from support_analytics.analytics.topics import classify
+    topics = WorkspaceConfig().topics
+    assert classify(["Hi", "My router has a red light"], topics).topic == "device"  # the greeting carries no topic
+    tie = classify(["cancel my plan and the router"], {"a": ["cancel"], "b": ["router"]})
+    assert tie.topic == "uncertain" and tie.confidence == 0.5
+    sure = classify(["I want to cancel"], topics)
+    assert sure.topic == "cancellation" and sure.confidence == 1.0
+    assert classify(["Thanks!"], topics).topic == "other"
+
+
+def test_labeled_topic_accuracy_does_not_regress() -> None:
+    from support_analytics.eval.topics_eval import evaluate, load, split
+    dev, test = split(load())
+    result = evaluate(test)  # measured once on the frozen keywords: 90.9%; guard against regressions
+    assert result["accuracy"] >= 0.9 and result["coverage"] >= 0.95
+    assert all(m["precision"] is None or m["precision"] >= 0.9 for t, m in result["per_topic"].items() if t != "other")
