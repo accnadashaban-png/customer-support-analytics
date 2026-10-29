@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.0
+
+- **Topic classification you can trust:** scored over every member message of a contact (not only the first),
+  Arabic normalization with dialect prefixes and suffixes, weighted keywords, a confidence per contact, and
+  "uncertain" when no topic is clearly ahead. Measured on 176 hand-labeled contacts: 90.9% accuracy on the unseen
+  half (tuned on the other half only), 100% precision on 6 of 7 topics; CI fails below 90%.
+- **Bigger demo business, Wasla** (fictional home-internet provider): 5,000 customers over 12 months, 8 agents,
+  Arabic dialects, English and Franco, greetings before the question, same-topic follow-ups, replies that match the
+  question. Fixed in the generator: a reused message id could overwrite a message, and a follow-up could be dated
+  before the reply; both are now tested.
+- The open queue shows the first message that says something, not "Hi".
+- **New look:** navy and cyan, light and dark with a switch, phone layout.
+- README: database diagram and real sample rows; METRICS: how topics are decided and measured.
+- 51 tests.
+
 ## 2.1.0
 
 - **Live webhook** `POST /api/webhook/message`: one message or a list per call, members created on first sight,

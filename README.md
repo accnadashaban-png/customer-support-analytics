@@ -1,13 +1,15 @@
 # Customer Support Analytics
 
 [![CI](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/accnadashaban-png/customer-support-analytics/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![Metric eval](https://img.shields.io/badge/metric%20eval-14%20scenarios%20%C2%B7%2025%20datasets-success) ![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![Metric eval](https://img.shields.io/badge/metric%20eval-14%20scenarios%20%C2%B7%2025%20datasets-success) ![Topics](https://img.shields.io/badge/topic%20accuracy-90.9%25%20on%20unseen%20labels-success) ![License](https://img.shields.io/badge/license-MIT-green)
 
 Support analytics for any community, helpdesk or chat team: **who is still waiting for an answer, how fast your team really replies in business hours, whether you meet your SLA, what people ask about, and who upgraded after talking to support.** Bring your own data as CSV or JSON, or connect a website chat or DMs live through a webhook.
 
 ![Dashboard: KPIs, the open queue sorted by business-time waiting, and the support funnel](docs/dashboard.jpg)
 
-> A public, from-scratch rebuild of an internal tool I built end to end at work, running here on **synthetic data**. No company data, names or integrations.
+**Demo business: Wasla**, a fictional home-internet provider: 5,000 customers, 12 months, 8 agents answering WhatsApp, web chat and email in one inbox, about 5,800 conversations and 16,000 messages in Arabic (Egyptian, Gulf, Levantine, Maghrebi, MSA), English and Franco, with bots, greetings, broadcasts, returning customers and plan changes (Free prepaid, Basic, Pro, Elite). Swap in your own data and topics; nothing in the code is specific to Wasla.
+
+> A public, from-scratch rebuild of the kind of internal tool I helped build at work, running here on **synthetic data**. No company data, names or integrations.
 
 ## What it answers
 
@@ -16,7 +18,7 @@ Support analytics for any community, helpdesk or chat team: **who is still waiti
 | Who is waiting for us right now? | An **open queue**, oldest first, with waiting time in business hours and alerts past a threshold. |
 | How fast do we reply, honestly? | First response to each **contact**, in calendar and **business** minutes (team time zone, working days, holidays). Bots never count as a reply. |
 | Do we meet our SLA? | Share of contacts answered within the target, and every breach, including unanswered ones. |
-| What do people ask about? | Arabic + English **topic** classification with per-topic reply rate, speed and SLA. |
+| What do people ask about? | **Topics scored over the whole conversation** (Arabic dialects, English, Franco, spelling variants), with a confidence, and **"uncertain" instead of a guess**. Measured on hand-labeled conversations: **90.9% accuracy on the unseen half**, 100% precision on 6 of 7 topics. Per-topic reply rate, speed and SLA. |
 | Does support drive revenue? | Upgrades within 14 days of a contact, the **monthly revenue** they added, and a contacted → replied → within SLA → upgraded **funnel**. |
 | Who on the team carries the load? | Per-agent first replies, speed and SLA. |
 
@@ -42,7 +44,7 @@ python -m support_analytics eval     # scenarios 14/14 (79 checks), invariants 2
 pip install -e ".[dev]"
 python -m support_analytics sync                    # demo data (run it twice: nothing changes)
 uvicorn support_analytics.api.app:app               # dashboard on http://127.0.0.1:8000
-pytest                                              # 44 tests
+pytest                                              # 51 tests
 ```
 
 **Your own data:** `python -m support_analytics sync --csv ./my-export` with the three CSVs described in [DATA.md](docs/DATA.md)
@@ -52,6 +54,63 @@ pytest                                              # 44 tests
 **Live data:** send each chat or DM message to `POST /api/webhook/message` as it happens (a ready [n8n workflow](examples/n8n/forward-support-messages.json) is included), push batches to `POST /api/ingest`, or let the API re-import a folder on a schedule. See [LIVE.md](docs/LIVE.md).
 
 **Docker:** `docker build -t customer-support-analytics . && docker run -p 8000:8000 customer-support-analytics`
+
+## The database
+
+```mermaid
+erDiagram
+    members ||--o{ messages : "writes or receives"
+    members ||--o{ subscriptions : "changes plan"
+    members {
+        text id PK
+        text name
+        text email "optional"
+        text joined_at "UTC"
+    }
+    messages {
+        text id PK
+        text conversation_id "a DM, chat or ticket thread"
+        text member_id FK
+        text sender "member or agent"
+        text agent_name
+        text body
+        text sent_at "UTC"
+        int is_automated "bots, codes, reminders: never a reply"
+    }
+    subscriptions {
+        text member_id PK
+        text started_at PK "UTC"
+        text tier "your plan names, in order"
+        text status "active, trial, canceled, past_due, expired"
+    }
+    sync_runs {
+        int id PK
+        text started_at
+        text finished_at
+        text status "ok, failed or empty"
+        int members
+        int messages
+        int subscriptions
+        text error
+    }
+```
+
+Contacts, response times, SLA, waiting, topics and upgrades are **computed** from these three tables on every request, so a rule change never needs a migration. Sample rows from the demo:
+
+| `members` | id | name | email | joined_at |
+|---|---|---|---|---|
+| | m0012 | Hassan Shawky | hassan.12@example.com | 2024-11-27T18:00:00Z |
+
+| `messages` | id | conversation_id | sender | agent_name | body | sent_at | is_automated |
+|---|---|---|---|---|---|---|---|
+| | c0012_0_0 | c0012_0 | member | | The technician missed the appointment | 2025-11-13T00:59:00Z | 0 |
+| | c0012_0_1 | c0012_0 | agent | Youssef | تمام، الفني هيكلمك قبل ما يوصل. | 2025-11-13T07:13:14Z | 0 |
+
+| `subscriptions` | member_id | tier | status | started_at |
+|---|---|---|---|---|
+| | m0012 | Pro | trial | 2025-08-29T18:00:00Z |
+
+The demo has 5,000 members, about 15,800 messages and 5,700 plan rows.
 
 ## API
 
