@@ -16,5 +16,5 @@ NOW = datetime(2026, 10, 23, 18, tzinfo=UTC)
 @pytest.fixture(scope="session")
 def demo_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
     path = tmp_path_factory.mktemp("demo") / "support.db"
-    sync(connect(path), SyntheticSource(seed=7))
+    sync(connect(path), SyntheticSource(seed=7, members=450, days=120))
     return path
